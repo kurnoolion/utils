@@ -4,17 +4,30 @@
 #  - Clones github.com repo over HTTPS (read-only pulls from public repo)
 #  - Sets commit identity (company)
 #  - Adds 'company' remote (SSH)
-#  - Pushes initial state to company git
+#  - Pushes state to company git
+#
+# Usage:
+#   setup-work.sh              # assumes company repo is EMPTY (first ever setup)
+#   setup-work.sh --existing   # company repo already has content (colleague
+#                              # commits, or a previous manual setup). Fetches
+#                              # and merges company/<branch> before pushing.
 #
 # Prerequisites:
 #  - github.com repo is public (HTTPS clone works without creds)
 #  - SSH key for company git is already set up (you can `ssh -T` successfully)
-#  - Empty repo already exists on company git (standard on GH Enterprise/GitLab)
+#  - Company-side repo exists (empty for default mode, populated for --existing)
 # ----------------------------------------------------------------------------
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck disable=SC1091
 source "$HERE/config.sh"
+
+MODE="empty"
+case "${1:-}" in
+    --existing) MODE="existing" ;;
+    "")         MODE="empty" ;;
+    *) echo "ERROR: unknown arg '$1'. Use --existing or no args." >&2; exit 1 ;;
+esac
 
 for v in GITHUB_HTTPS_URL COMPANY_SSH_URL WORK_REPO_DIR; do
     if [[ "${!v}" == *"<"* || -z "${!v}" ]]; then
@@ -56,11 +69,34 @@ echo "==> Testing SSH to company git"
 HOST_PART="${COMPANY_SSH_URL#*@}"; HOST_PART="${HOST_PART%%:*}"
 ssh -o StrictHostKeyChecking=accept-new -T "git@$HOST_PART" 2>&1 | head -5 || true
 
-echo "==> Pushing initial state to company ($COMPANY_REMOTE/$DEFAULT_BRANCH)"
-git push -u "$COMPANY_REMOTE" "$DEFAULT_BRANCH"
+git checkout "$DEFAULT_BRANCH"
+
+if [[ "$MODE" == "existing" ]]; then
+    echo "==> [--existing] Fetching $COMPANY_REMOTE"
+    git fetch "$COMPANY_REMOTE"
+
+    if git rev-parse --verify --quiet "$COMPANY_REMOTE/$DEFAULT_BRANCH" >/dev/null; then
+        echo "==> [--existing] Merging $COMPANY_REMOTE/$DEFAULT_BRANCH into local $DEFAULT_BRANCH"
+        git merge --no-edit "$COMPANY_REMOTE/$DEFAULT_BRANCH" || {
+            echo "ERROR: merge failed. Resolve conflicts, then:" >&2
+            echo "  git push -u $COMPANY_REMOTE $DEFAULT_BRANCH" >&2
+            exit 1
+        }
+    else
+        echo "==> [--existing] No $COMPANY_REMOTE/$DEFAULT_BRANCH on company yet — treating as empty."
+    fi
+
+    # Upstream tracking for the company remote (makes later 'git push' ergonomic)
+    echo "==> Setting upstream of $DEFAULT_BRANCH to $COMPANY_REMOTE/$DEFAULT_BRANCH"
+    git push -u "$COMPANY_REMOTE" "$DEFAULT_BRANCH"
+else
+    echo "==> Pushing initial state to company ($COMPANY_REMOTE/$DEFAULT_BRANCH)"
+    git push -u "$COMPANY_REMOTE" "$DEFAULT_BRANCH"
+fi
 
 echo "---"
 git remote -v
 echo "---"
 echo "Identity: $(git config user.name) <$(git config user.email)>"
+echo "Mode: $MODE"
 echo "Done. Use sync-work.sh for day-to-day syncing."
