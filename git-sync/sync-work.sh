@@ -20,10 +20,12 @@ source "$HERE/config.sh"
 
 cd "$WORK_REPO_DIR"
 
-# Refuse to run with uncommitted local changes — we don't expect any on work PC.
+# Refuse to run with an unclean working tree. Committed local commits are fine
+# — they'll be pushed to company. Only uncommitted diffs block sync, to avoid
+# silently entangling unrelated in-progress edits with a merge.
 if [[ -n "$(git status --porcelain)" ]]; then
-    echo "ERROR: uncommitted changes on work PC. Inspect with 'git status'." >&2
-    echo "Work PC is a relay — it should not have local edits." >&2
+    echo "ERROR: working tree is not clean. Commit or stash before syncing." >&2
+    git status --short >&2
     exit 1
 fi
 
