@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# ----------------------------------------------------------------------------
+# Daily flow on WORK PC. Bridges github.com <- one-way -> company git.
+#
+# Order (as you specified):
+#   1. Pull colleague changes from company git
+#   2. Pull your new changes from github.com
+#   3. Merge if both changed (usually clean: different files)
+#   4. Push merged state back to company git
+#
+# Safe to run even when only one side has new commits.
+#
+# Usage:
+#   sync-work.sh
+# ----------------------------------------------------------------------------
+set -euo pipefail
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1091
+source "$HERE/config.sh"
+
+cd "$WORK_REPO_DIR"
+
+# Refuse to run with uncommitted local changes — we don't expect any on work PC.
+if [[ -n "$(git status --porcelain)" ]]; then
+    echo "ERROR: uncommitted changes on work PC. Inspect with 'git status'." >&2
+    echo "Work PC is a relay — it should not have local edits." >&2
+    exit 1
+fi
+
+git checkout "$DEFAULT_BRANCH"
+
+echo "==> [1/4] Fetching $COMPANY_REMOTE"
+git fetch "$COMPANY_REMOTE"
+
+echo "==> [2/4] Merging $COMPANY_REMOTE/$DEFAULT_BRANCH (colleague changes)"
+git merge --no-edit "$COMPANY_REMOTE/$DEFAULT_BRANCH"
+
+echo "==> [3/4] Fetching $GITHUB_REMOTE"
+git fetch "$GITHUB_REMOTE"
+
+echo "==> [3/4] Merging $GITHUB_REMOTE/$DEFAULT_BRANCH (your changes)"
+git merge --no-edit "$GITHUB_REMOTE/$DEFAULT_BRANCH"
+
+# Decide whether we need to push
+LOCAL=$(git rev-parse "$DEFAULT_BRANCH")
+REMOTE=$(git rev-parse "$COMPANY_REMOTE/$DEFAULT_BRANCH")
+if [[ "$LOCAL" == "$REMOTE" ]]; then
+    echo "==> [4/4] Company git already up to date — no push needed."
+else
+    echo "==> [4/4] Pushing to $COMPANY_REMOTE/$DEFAULT_BRANCH"
+    git push "$COMPANY_REMOTE" "$DEFAULT_BRANCH"
+fi
+
+echo "---"
+git log --oneline --decorate -n 5
+echo "Done."
