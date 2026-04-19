@@ -24,13 +24,14 @@ def run_scan(root: str, db_path: str, resume: bool) -> None:
         completed = {
             row[0] for row in conn.execute("SELECT path FROM completed_dirs")
         }
+        stack = _build_initial_stack(conn, completed, root_abs, resume)
         log.info(
-            "Starting scan of %s (already-complete dirs: %d)",
+            "Starting scan of %s (already-complete dirs: %d, queued: %d)",
             root_abs,
             len(completed),
+            len(stack),
         )
 
-        stack: list[tuple[str, str]] = [("", root_abs)]
         files_seen = 0
         dirs_seen = 0
         errors_seen = 0
@@ -38,17 +39,7 @@ def run_scan(root: str, db_path: str, resume: bool) -> None:
 
         while stack:
             rel, abs_path = stack.pop()
-
             if rel in completed:
-                # Already enumerated. Re-queue any subdirs that aren't yet
-                # complete using the DB (no NAS hit for this listing).
-                for sub_rel, sub_name in conn.execute(
-                    "SELECT path, name FROM entries "
-                    "WHERE parent_path=? AND kind='folder'",
-                    (rel,),
-                ):
-                    if sub_rel not in completed:
-                        stack.append((sub_rel, os.path.join(abs_path, sub_name)))
                 continue
 
             f, d, errs, subdirs = _scan_one_dir(conn, rel, abs_path)
@@ -59,7 +50,9 @@ def run_scan(root: str, db_path: str, resume: bool) -> None:
             # Mark this dir complete in same transaction as its child rows
             # (handled inside _scan_one_dir).
             completed.add(rel)
-            stack.extend(subdirs)
+            for sub_rel, sub_abs in subdirs:
+                if sub_rel not in completed:
+                    stack.append((sub_rel, sub_abs))
 
             now = time.time()
             if now - last_progress >= PROGRESS_INTERVAL_SEC:
@@ -97,10 +90,47 @@ def _record_or_verify_meta(conn, root_abs: str, resume: bool) -> None:
             f"Pass --resume to continue, or use a different --db."
         )
     if existing != root_abs:
-        raise SystemExit(
-            f"DB was created for root '{existing}', cannot resume with "
-            f"different root '{root_abs}'."
+        # Allowed: paths in DB are POSIX-relative, so re-anchoring under a
+        # different absolute root (e.g. WSL → Windows UNC) just works.
+        log.warning(
+            "Resuming with root '%s' (originally scanned as '%s'). "
+            "Re-anchoring relative paths to new root.",
+            root_abs, existing,
         )
+        set_meta(conn, "scan_root_resumed_as", root_abs)
+        set_meta(conn, "scan_os_resumed_as", os.name)
+
+
+def _build_initial_stack(
+    conn, completed: set[str], root_abs: str, resume: bool
+) -> list[tuple[str, str]]:
+    """Initial DFS frontier.
+
+    Fresh scan starts at root. Resume seeds the stack with every known
+    folder that is not yet in completed_dirs — re-anchored to root_abs at
+    runtime, so the OS path format from the original scan doesn't matter.
+    """
+    if not resume:
+        return [("", root_abs)]
+
+    stack: list[tuple[str, str]] = []
+    if "" not in completed:
+        stack.append(("", root_abs))
+
+    rows = conn.execute(
+        "SELECT path FROM entries WHERE kind='folder'"
+    ).fetchall()
+    for (rel,) in rows:
+        if rel and rel not in completed:
+            stack.append((rel, _abs_for(root_abs, rel)))
+    return stack
+
+
+def _abs_for(root_abs: str, rel_posix: str) -> str:
+    if not rel_posix:
+        return root_abs
+    native = rel_posix.replace("/", os.sep) if os.sep != "/" else rel_posix
+    return os.path.join(root_abs, native)
 
 
 def _scan_one_dir(conn, rel: str, abs_path: str):

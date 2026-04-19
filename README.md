@@ -82,7 +82,7 @@ python -m disk_cleaner scan --root <dir> --db <path.db> [--resume]
 - Walks every file and folder under `--root`, recording metadata in SQLite.
 - Skips symlinks/junctions (avoids loops and double-counting).
 - Per-directory transaction with checkpoint, so Ctrl-C loses at most one directory's worth of work.
-- `--resume` continues an interrupted scan against the same root. Refuses if the recorded root differs.
+- `--resume` continues an interrupted scan. The DB stores POSIX-relative paths, so resuming under a *different* absolute root (e.g. you started from WSL `/mnt/y/share` and want to resume from PowerShell `\\nas\share`) is allowed — paths are re-anchored to whatever `--root` you pass. The original root is preserved in `scan_meta` for audit; the new one is recorded as `scan_root_resumed_as`.
 - Logs progress every 5 seconds: `files=N dirs=N errors=N stack=N`.
 - Permission errors on individual files/dirs are logged to the `scan_errors` table and the scan continues.
 

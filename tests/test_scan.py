@@ -184,16 +184,53 @@ def test_resume_after_partial_completion_picks_up_new_files(tmp_path):
     assert "sub1" in completed  # re-completed during resume
 
 
-def test_resume_with_different_root_refuses(tmp_path):
+def test_resume_with_different_root_succeeds_and_reanchors(tmp_path):
+    """Cross-OS resume case: scan from root1, resume from root2 (different
+    abs path) — should pick up the same logical tree and finish the work."""
     root1 = tmp_path / "a"
     root2 = tmp_path / "b"
     root1.mkdir()
-    root2.mkdir()
+    _make_tree(root1)
     db = tmp_path / "scan.db"
     run_scan(str(root1), str(db), resume=False)
 
-    with pytest.raises(SystemExit, match="different root"):
-        run_scan(str(root2), str(db), resume=True)
+    # Build an identical tree under a different root and resume there.
+    root2.mkdir()
+    _make_tree(root2)
+    run_scan(str(root2), str(db), resume=True)
+
+    meta = dict(_query(db, "SELECT key, value FROM scan_meta"))
+    assert meta["scan_root_original"] == os.path.abspath(str(root1))
+    assert meta["scan_root_resumed_as"] == os.path.abspath(str(root2))
+
+
+def test_resume_recovers_deep_subtree(tmp_path):
+    """Crash deep in the tree must not leave incomplete work behind on resume.
+
+    Regression: previously, resume only descended one level into already-
+    completed dirs, so an incomplete grandchild was unreachable.
+    """
+    root = tmp_path / "tree"
+    deep = root / "A" / "X" / "Y" / "Z"
+    deep.mkdir(parents=True)
+    (deep / "leaf.txt").write_text("deep")
+    db = tmp_path / "scan.db"
+    run_scan(str(root), str(db), resume=False)
+
+    # Simulate crash *inside* Z: drop Z's completion marker + its leaf.
+    conn = sqlite3.connect(str(db))
+    conn.execute("DELETE FROM completed_dirs WHERE path='A/X/Y/Z'")
+    conn.execute("DELETE FROM entries WHERE path='A/X/Y/Z/leaf.txt'")
+    conn.commit()
+    conn.close()
+
+    run_scan(str(root), str(db), resume=True)
+
+    paths = {p for (p,) in _query(db, "SELECT path FROM entries")}
+    assert "A/X/Y/Z/leaf.txt" in paths
+
+    completed = {p for (p,) in _query(db, "SELECT path FROM completed_dirs")}
+    assert "A/X/Y/Z" in completed
 
 
 def test_nonexistent_root_raises(tmp_path):

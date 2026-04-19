@@ -39,7 +39,7 @@ Files are bucketed by extension into: `text`, `office`, `image`, `video`, `code`
 ## Progress
 - [x] Design discussed and approved (2026-04-18)
 - [x] Project scaffold created
-- [x] `scan` subcommand implemented (resumable, skips symlinks, logs errors)
+- [x] `scan` subcommand implemented (resumable, skips symlinks, logs errors). Resume seeds the DFS frontier from every known-incomplete folder (so deep-tree crashes are recoverable) and re-anchors paths under the current `--root`, so a WSL scan can be resumed from PowerShell with a different abs path.
 - [x] `finalize` subcommand implemented (bottom-up folder size aggregation; idempotent; refuses incomplete scan unless `--force`)
 - [x] `export-review` subcommand implemented (filtered Excel + Meta sheet, Y/N dropdown on `Delete?`, sorted by size desc, frozen header, autofilter)
 - [x] `cleanup` subcommand implemented (reads marked xlsx → moves to trash; resumable; dry-run; refuses cross-volume by default; per-run log + errors-only log)
