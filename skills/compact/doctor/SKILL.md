@@ -83,13 +83,15 @@ Grep for `docs/` paths that don't start with `docs/compact/`.
 - **Pass:** no violations. Every `docs/X` reference has `X = compact` (or a subpath under compact).
 - **Fail:** list each `file:line` + the offending path.
 
-### 8. Symlink health (source-repo only)
+### 8. Symlink health (source-repo only, optional)
 
-If scaffold root resolves to `<repo>/skills/compact/`, check that `<repo>/.claude/skills/compact` is a symlink resolving to a path containing `SKILL.md`.
+If scaffold root resolves to `<repo>/skills/compact/` **and** `<repo>/.claude/skills/` exists as a directory, check that `<repo>/.claude/skills/compact` is a symlink resolving to a path containing `SKILL.md`.
 
-- **Pass:** symlink exists and resolves to an existing SKILL.md.
-- **Skip:** scaffold root doesn't match the source-repo layout (installed context).
-- **Fail:** broken or missing symlink in source-repo context.
+The symlink is optional in source-repo context — utils isn't a COMPACT-using project, and the symlink only matters if someone has set up local skill discovery inside the source repo. When `<repo>/.claude/skills/` doesn't exist, skip.
+
+- **Pass:** `<repo>/.claude/skills/` exists and the `compact` symlink resolves to an existing SKILL.md.
+- **Skip:** scaffold root doesn't match the source-repo layout (installed context), **or** `<repo>/.claude/skills/` doesn't exist (symlink not set up — fine).
+- **Fail:** `<repo>/.claude/skills/` exists but the `compact` symlink is broken or missing inside it.
 
 ### 9. Sibling-skill references resolve
 

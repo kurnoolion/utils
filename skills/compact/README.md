@@ -139,11 +139,13 @@ Slash-command syntax below is Claude Code. In Cline, invoke the same skills by n
 1. User opens a new conversation in Claude Code or Cline.
 2. `CLAUDE.md` / `.clinerules` one-liner triggers `session-start`.
 3. `session-start` detects an empty `docs/compact/` and offers `/project-init`.
-4. `/project-init` runs the 7-topic interview, customizes phase prompts, scaffolds state files.
+4. `/project-init` runs an optional preflight (import existing design docs into `docs/compact/design-inputs/`), the 7-topic interview, customizes phase prompts, and scaffolds state files.
 5. `session-start` re-hydrates; user runs `/switch-phase requirements`.
-6. User iterates on `PROJECT.md`; `/close-session` commits.
+6. User iterates on `PROJECT.md` (seeded from design inputs if provided); `/close-session` commits.
 7. Next session: `/switch-phase architecture`; draft `MODULE.md` skeletons; `/close-session` captures decisions; `/regen-map` updates MAP.
 8. Subsequent sessions: `/switch-phase development`; implement against the contracts in `MODULE.md`; `/close-session` audits.
+
+**Bringing in existing design work:** if you drafted a design doc in Claude web, ChatGPT, or another tool before starting, `/project-init` asks for it upfront. Paste it or give a file path; it lands in `docs/compact/design-inputs/` and the generated requirements + architecture phase prompts automatically reference it as a starting proposal to refine. Greenfield projects just reply `skip`.
 
 ## Overview deck
 

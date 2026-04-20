@@ -1051,7 +1051,10 @@ A: Decisions are immutable. Add a new one marking the old as `Superseded by`. Hi
 A: Run `/project-init --re-init`. Answers preserved as defaults; edit and regenerate.
 
 **Q: Can I use this on an existing project?**
-A: Not yet — retrofit is a later phase. Greenfield first.
+A: Not yet — retrofit (against already-written code) is a later phase. Greenfield first.
+
+**Q: I already drafted a design doc in Claude web / ChatGPT / a doc tool. Can I bring it in?**
+A: Yes — `/project-init` has a preflight that imports design artifacts into `docs/compact/design-inputs/`. The generated requirements + architecture phase prompts automatically reference them as starting proposals. You still go through all three phases, but the AI drafts PROJECT.md fields and candidate module boundaries from your inputs instead of starting blank. Reply `skip` at the preflight if greenfield.
 
 **Q: What's the cost of all this ceremony?**
 A: ~5-10 min of overhead per session. Payoff: codebase stays auditable, team stays in sync.

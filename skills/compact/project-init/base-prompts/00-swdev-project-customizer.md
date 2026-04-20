@@ -95,6 +95,24 @@ COMPACT assumes **all stakeholders are involved from Day 1**, not just developer
 
 ---
 
+## Design inputs (optional)
+
+Projects often start with design artifacts drafted elsewhere (Claude web, ChatGPT, a doc tool) — design docs, product specs, architecture sketches, meeting notes. The `project-init` skill's preflight step copies these into `docs/compact/design-inputs/`.
+
+**If `docs/compact/design-inputs/` exists and is non-empty** when you're generating phase prompts, wire them in:
+
+- **requirements.md — Load when entering:** add `docs/compact/design-inputs/*` to the list.
+- **requirements.md — Do:** add a bullet: "First pass: extract PROJECT.md fields (one-line, Problem, Users, In scope v1, Out of scope, Success criteria, Open questions, Contributors) from `docs/compact/design-inputs/`. Present as a draft for the user to refine. Treat design inputs as starting proposals, not authoritative specs — surface contradictions, gaps, or stale assumptions as Open questions."
+
+- **architecture.md — Load when entering:** add `docs/compact/design-inputs/*` to the list.
+- **architecture.md — Do:** add a bullet: "Extract candidate module boundaries and their public surfaces from `docs/compact/design-inputs/`. Present as a proposal. Each accepted module gets a doc-first `MODULE.md` draft per the standard rules. If design inputs disagree with tech-stack or stakeholder answers from the interview, flag the conflict and resolve before drafting MODULE.md files."
+
+- **development.md:** no explicit wiring. By the time development starts, design inputs have been distilled into `PROJECT.md` + `MODULE.md` — those are the canonical sources for implementation. Design inputs remain on disk as historical reference but don't drive development decisions directly.
+
+**If `docs/compact/design-inputs/` does not exist or is empty (greenfield)**, omit these lines entirely — do not leave placeholder references to a path that isn't there.
+
+---
+
 ## What to generate
 
 Three customized phase prompts (~400-600 words each), written to:
