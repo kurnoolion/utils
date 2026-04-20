@@ -30,7 +30,8 @@ case "${1:-}" in
 esac
 
 for v in GITHUB_HTTPS_URL COMPANY_SSH_URL WORK_REPO_DIR; do
-    if [[ "${!v}" == *"<"* || -z "${!v}" ]]; then
+    val="${!v:-}"
+    if [[ -z "$val" || "$val" == *"<"* ]]; then
         echo "ERROR: config.sh has placeholder/empty value for $v" >&2
         exit 1
     fi
