@@ -14,7 +14,9 @@ Ask all 7 in a single batch; I'll answer in one pass.
 
 1. **What we're building** — system/product description, the core problem it solves.
 2. **How we're building** — languages, frameworks, infrastructure, key dependencies. Also: **what counts as a "module"** in this stack (directory convention, package boundary, etc.) and the **visibility mapping** (which syntactic marker means `pub` vs `internal`). This feeds `structure-conventions.md`.
-3. **Team & contribution structure** — who contributes what, across design / development / validation / correction / evaluation. This goes into `PROJECT.md` as a Contributors section; per-module ownership lands in `MODULE.md`.
+3. **Stakeholder map & contribution surfaces** — for **every** stakeholder involved from Day 1 (devs, TPMs, QA, domain experts, end users, reviewers), capture: (a) **name / role**; (b) **technical comfort** — do they edit markdown directly, or need a UI?; (c) **contribution type** — requirements edits, design feedback, artifact corrections, eval / test data, UI feedback, domain validation, ground-truth labels; (d) **required interface** — direct file edit, web UI, structured form, CSV / spreadsheet drop, CLI, issue tracker; (e) **feedback loop** — how the contribution reaches the LLM pipeline (staging file → review → merge; automated ingestion; manual copy-paste). This feeds `PROJECT.md` Contributors (full table) and drives architecture (surfaces become modules) and tech-stack choices (topic 2 must support the interfaces topic 3 demands). Per-module ownership lands in `MODULE.md` as an optional `Owner` line.
+
+   **Cross-topic check:** If topic 3 names non-dev contributors needing a web UI, form, or review queue, topic 2's stack must support it. If the answers are inconsistent (e.g. "TPMs edit requirements via web UI" + "CLI-only Python"), surface the gap during the interview and resolve before generating phase prompts.
 4. **Domain constraints** — regulated industry? Real-time? Scale? Compliance? Data sensitivity? (Determines how heavily the prompts emphasize observability, resilience, and security.)
 5. **LLM access model** — does the LLM have direct access to runtime data, output artifacts, and eval results? If not, what are the limitations?
 6. **Pain points** — what typically goes wrong? What should the AI catch?
@@ -79,6 +81,20 @@ Under "Do" in each generated prompt, mention the skills the user will invoke:
 
 ---
 
+## Contribution surfaces as first-class design
+
+COMPACT assumes **all stakeholders are involved from Day 1**, not just developers. Non-dev contributors (TPMs, QA, domain experts, end users) need real interfaces to contribute, and those interfaces are part of the system — not admin-tool afterthoughts. Wire this into the generated prompts:
+
+- **Contribution surfaces are first-class modules.** Every row in PROJECT.md Contributors that requires a non-trivial interface (web UI, structured form, review queue, ingestion pipeline) gets its own `src/<surface>/MODULE.md`, drafted doc-first during architecture with the same rigor as core pipeline modules. Don't short-cut design or testing just because "it's only for the TPM."
+
+- **Tech-stack must match stakeholder needs.** The stack chosen in topic 2 has to actually support the interfaces topic 3 demands. If topic 3 requires a web UI and topic 2 names a CLI-only Python stack, that's a stack gap — flag it as a decision that needs resolution before architecture begins.
+
+- **Feedback-loop is part of the design.** For every contribution surface, architecture must specify: how the contribution enters the pipeline (file watcher, commit hook, scheduled ingest, form submission); how it's validated; how conflicts between stakeholder input and AI-generated output are resolved. A contribution surface without a defined feedback loop is half-built.
+
+- **Missing rows are risks.** If PROJECT.md Contributors has no correction path for AI hallucinations, no eval-data channel, or no domain-expert validator, those gaps are v1 risks — surfaced in Open questions during requirements, and converted to DECISIONS entries or STATUS.md Flags during close-session.
+
+---
+
 ## What to generate
 
 Three customized phase prompts (~400-600 words each), written to:
@@ -92,18 +108,20 @@ Use `01-swdev-requirement-gathering.md`, `02-swdev-architecture-design.md`, and 
 ### requirements.md — wiring
 
 - **Artifacts**: populates `docs/compact/PROJECT.md` per its schema (one-line / Problem / Users / In scope v1 / Out of scope / Success criteria / Open questions / Contributors). Any Decision-worthy choices get triaged into `DECISIONS.md` at `/close-session`. Session state lands in `STATUS.md`.
-- **Exit criteria**: `PROJECT.md` complete; open questions either resolved, deferred, or moved to `STATUS.md` Flags.
-- **Contributors** subsection inside `PROJECT.md` captures the topic-3 contribution map (no separate artifact).
+- **Contributors table is complete.** Every stakeholder row has all four columns filled: contribution type, interface, feedback loop. Gaps (unowned validation, no correction path for AI output, no eval-data channel) land in Open questions or `STATUS.md` Flags — never silently omitted.
+- **Exit criteria**: `PROJECT.md` complete, including a fully populated Contributors table. Open questions either resolved, deferred, or moved to `STATUS.md` Flags.
 
 ### architecture.md — wiring
 
 - **Artifacts**: **doc-first `src/<module>/MODULE.md`** skeletons for every planned module (curated sections filled; `<!-- BEGIN:STRUCTURE --> / <!-- END:STRUCTURE -->` markers present but empty). Non-obvious choices become `DECISIONS.md` entries with `D-XXX` IDs, linked from MODULE.md's Key choices. `MAP.md` is regen-generated — never hand-edit. Session state via `/close-session`.
+- **Contribution surfaces are first-class modules.** For every row in `PROJECT.md` Contributors that needs a non-trivial interface (web UI, form, review queue, ingestion pipeline), draft `src/<surface>/MODULE.md` doc-first alongside core modules. Design the feedback loop explicitly: how contributions enter the pipeline, how they're validated, how conflicts with AI output are resolved.
 - **Risk disposition**: COMPACT has no separate risk register. Durable design risks become `DECISIONS.md` entries with the risk and mitigation captured in Consequences. Time-boxed watch-items (e.g. "monitor latency after launch") become `STATUS.md` Flags. The generated `architecture.md` must not prescribe a standalone risk artifact.
-- **Exit criteria**: every planned module has a MODULE.md draft; dependency graph is acyclic (or each cycle justified in a DECISIONS entry); `/regen-map` output is clean.
+- **Exit criteria**: every planned module has a MODULE.md draft (including every contribution surface); dependency graph is acyclic (or each cycle justified in a DECISIONS entry); `/regen-map` output is clean.
 
 ### development.md — wiring
 
 - **Artifacts**: code; tests; debug instrumentation (scale by observability level — see below). Decisions surfaced mid-implementation go into the triage pass at `/close-session`. `MODULE.md` curated-section edits trigger the hard-flag / soft-flag rules.
+- **Contribution-surface code is first-class.** When implementing a module that's a contribution surface (web UI, form, intake pipeline), apply the same design and test rigor as core pipeline modules. "It's only for the TPM / QA" is not a reason to cut corners on validation, error handling, or test coverage. The surface *is* the product for that stakeholder.
 - **Exit criteria**: feature implemented; tests pass; `MODULE.md` contracts honored; no unresolved hard-flags.
 - **Core rule to include**: "If you're about to change a curated section of `MODULE.md` (Public surface, Invariants, Non-goals, Depends on), **stop and switch to architecture phase**. Silent contract evolution is a hard-flag."
 

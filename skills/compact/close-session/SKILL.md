@@ -70,19 +70,31 @@ Otherwise skip regen and tell the user which case applied.
 
 Surface `regen-map`'s full output, including any self-check reverts.
 
-### 6. Produce summary
+### 6. Scan contribution drop-paths
+
+Read `docs/compact/PROJECT.md` Contributors table. For every row whose **Feedback loop** column names a file-based drop-path (e.g. `contributions/eval/*.yaml`, `contributions/corrections/`), check that path for new or modified artifacts since the last commit.
+
+For each finding:
+
+- List the files and the stakeholder role they came from.
+- Ask the user: route to pipeline (ingest now), defer (log in Flags), or reject (note why)?
+- **Do not auto-ingest.** Stakeholder contributions are inputs that affect AI behavior — they deserve the same review as decisions.
+
+Skip this step entirely if the Contributors table has no file-based loops (all contributions come through git, web UI, or issue tracker).
+
+### 7. Produce summary
 
 - Files changed in `docs/compact/` and `src/**/MODULE.md`.
 - Unresolved items → write to STATUS.md **Flags** section for next session.
 - Draft commit message: short imperative; reference any new `D-XXX` IDs.
 
-### 7. Commit decision
+### 8. Commit decision
 
 Show the full diff once more. Ask: `commit` / `stage only` / `abort`.
 
 - `commit` → commit with the drafted message.
 - `stage only` → `git add` the changes; leave commit to the user.
-- `abort` → do nothing further. Writes from steps 2, 3, 4 are **not** reverted — they were approved individually.
+- `abort` → do nothing further. Writes from steps 2, 3, 4, 6 are **not** reverted — they were approved individually.
 
 **Never auto-commit. Never skip diff review.**
 
