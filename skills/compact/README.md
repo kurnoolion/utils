@@ -32,6 +32,9 @@ Add the auto-trigger one-liner. Tools read different files, so pick based on whi
 
 ```
 At the start of any new conversation, invoke the `session-start` skill.
+If the conversation has been auto-compacted since the last `session-start`,
+re-invoke it before continuing work so Tier 1 state (PROJECT.md, STATUS.md,
+active phase, relevant MODULE.md) is reloaded from disk.
 ```
 
 **Cline also requires:** the VS Code Cline extension installed and its model provider configured (Base URL, API key, model ID). See `COMPACT_Overview.md` Part 8 for the full Cline setup — extension, provider config, `.clineignore`, and auto-approve settings (keep writes in `docs/compact/` **off** auto-approve — every memory-file edit should be human-reviewed).
@@ -146,6 +149,38 @@ Slash-command syntax below is Claude Code. In Cline, invoke the same skills by n
 8. Subsequent sessions: `/switch-phase development`; implement against the contracts in `MODULE.md`; `/close-session` audits.
 
 **Bringing in existing design work:** if you drafted a design doc in Claude web, ChatGPT, or another tool before starting, `/project-init` asks for it upfront. Paste it or give a file path; it lands in `docs/compact/design-inputs/` and the generated requirements + architecture phase prompts automatically reference it as a starting proposal to refine. Greenfield projects just reply `skip`.
+
+## Long sessions and auto-compaction
+
+Claude Code auto-summarizes earlier portions of a conversation when approaching the context limit. The summary preserves intent but can lose specific file contents. COMPACT is designed to make this largely harmless — the authoritative state (`PROJECT.md`, `STATUS.md`, `DECISIONS.md`, `MAP.md`, active phase file, `MODULE.md` files) lives on disk, not in conversation history. What compaction can lose, a re-read can restore.
+
+Three habits make this a non-issue in practice:
+
+1. **Re-invoke `session-start` after compaction or when context feels stale.** It's idempotent and cheap — reloads Tier 1 from disk in a single pass. Trust the files over model recall.
+2. **Checkpoint often with `close-session`.** Once progress is captured into `STATUS.md` + `DECISIONS.md`, a later compaction can lose chat detail without losing the work.
+3. **Ask the AI to re-read before acting on specifics.** "Re-read `src/<module>/MODULE.md` before you propose that change." Good habit on any long-running task.
+
+Cline doesn't auto-compact, so habits 1-3 are team ritual rather than tool-enforced. Claude Code users can optionally automate a post-compaction reminder by adding a `PreCompact` hook to the project's `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'COMPACT: conversation being auto-compacted. After compaction completes, re-invoke /session-start to re-hydrate state from disk (PROJECT.md, STATUS.md, active phase file, relevant MODULE.md).'"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+The hook's stdout becomes part of post-compaction context, so the reminder survives the summarization step. Verify the exact schema against current Claude Code hook docs — the `PreCompact` event and the `hooks[].hooks[].command` structure are the pieces you're targeting.
 
 ## Overview deck
 

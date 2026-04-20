@@ -888,7 +888,9 @@ Goal: one scaffold that travels with you.
 4. Add to `CLAUDE.md` at repo root (create if missing):
    ```
    At the start of any new conversation, invoke the
-   session-start skill.
+   session-start skill. If the conversation has been
+   auto-compacted since the last session-start, re-invoke
+   it before continuing work.
    ```
 5. Start a session: `claude` in the repo. `session-start` fires; `/project-init` if uninitialized.
 
@@ -924,6 +926,8 @@ Create **`.clinerules`** at the project root (Cline's equivalent of `CLAUDE.md`)
 
 ```
 At the start of any new conversation, invoke the session-start skill.
+For long sessions, re-invoke session-start any time context feels
+stale so Tier 1 state is reloaded from disk.
 
 Skills live in .claude/skills/<skill-name>/SKILL.md. Read the SKILL.md
 to understand how to invoke each skill. Available skills:
@@ -931,7 +935,7 @@ to understand how to invoke each skill. Available skills:
     regen-map, project-init, doctor
 ```
 
-Cline reads `.clinerules` when a conversation starts. No other config needed.
+Cline reads `.clinerules` when a conversation starts. No other config needed. Cline doesn't auto-compact, so the re-invocation is manual when the team spots staleness (model referring to files by recall instead of re-reading).
 
 ---
 
@@ -977,6 +981,20 @@ When `close-session` proposes a change:
 - **`.clineignore`**: works like `.gitignore`. **Do not** add `docs/compact/` or `MODULE.md` to it — Cline needs to see them to hydrate context.
 - **Workspace state**: Cline keeps chat history per workspace. If you reuse a workspace for a different project, clear history first to avoid cross-project contamination.
 - **`.clinerules` precedence**: team-level `.clinerules` in the repo overrides any global user rules. That's what we want — project shapes behavior, not user setup.
+
+---
+
+## Long sessions — handling auto-compaction
+
+Claude Code auto-summarizes earlier portions of a conversation as it nears the context limit. The summary keeps intent; it can lose specific file contents. COMPACT is designed so this is largely harmless — authoritative state lives on disk (`PROJECT.md`, `STATUS.md`, `DECISIONS.md`, `MAP.md`, active phase file, `MODULE.md`s). What compaction loses, a re-read restores.
+
+Three team habits keep sessions clean:
+
+1. **Re-invoke `session-start` after auto-compaction or when context feels stale.** It's idempotent and cheap; reloads Tier 1 from disk. Trust files over model recall.
+2. **Checkpoint often with `close-session`.** Progress captured into `STATUS.md` + `DECISIONS.md` survives any later compaction.
+3. **Ask the AI to re-read before acting on specifics.** *"Re-read `src/<module>/MODULE.md` before you propose that change."*
+
+Cline doesn't auto-compact, so habits 1-3 are team ritual. Claude Code users can automate the reminder with a `PreCompact` hook in `.claude/settings.json` — see README's "Long sessions and auto-compaction" section for the snippet.
 
 ---
 
@@ -1036,6 +1054,9 @@ A: It fires automatically via the CLAUDE.md one-liner. If you skip it, you lose 
 
 **Q: What if I forget `close-session`?**
 A: Next session you'll see stale STATUS and possibly uncommitted `docs/compact/`. `session-start` flags both. No data loss, just friction.
+
+**Q: What happens when Claude Code auto-compacts a long session?**
+A: The authoritative state (`PROJECT.md`, `STATUS.md`, `DECISIONS.md`, `MODULE.md`, active phase) lives on disk and isn't affected — only conversation history gets summarized. Re-invoke `session-start` after compaction to reload Tier 1 from disk. Optionally add a `PreCompact` hook to `.claude/settings.json` for an automatic reminder (see README). Cline doesn't auto-compact; on long Cline sessions, re-invoke `session-start` whenever context feels stale.
 
 **Q: Can I edit `MODULE.md` by hand?**
 A: Yes — curated sections (Purpose, Public surface, Invariants, Key choices, Non-goals). Never the Structure section (regen-map owns it).

@@ -1,9 +1,17 @@
 ---
 name: session-start
-description: Hydrate a new session with project context. Reads state files, shows current status, asks user what they're working on, then loads task-specific context on demand. Invoke at the start of any new conversation.
+description: Hydrate a new session with project context. Reads state files, shows current status, asks user what they're working on, then loads task-specific context on demand. Invoke at the start of any new conversation. Also safe and expected to re-invoke mid-session — especially after Claude Code's auto-compaction or any time context feels stale — to reload Tier 1 from disk. Read-only and idempotent.
 ---
 
 Hydrate enough context to be productive without burning the context window. Progressive loading: Tier 1 always, Tier 2 on demand, Tier 3 on reference.
+
+## When to invoke
+
+- **Start of every new conversation** (auto-triggered via `CLAUDE.md` / `.clinerules`).
+- **After auto-compaction.** When Claude Code summarizes an earlier portion of the conversation, specific Tier 1 contents can get lossy. Re-invoking reloads `PROJECT.md` / `STATUS.md` / `MAP.md` / active phase file from disk.
+- **Any time context feels stale.** Long sessions, many tool calls, or when the AI starts referring to state by recall instead of re-reading. The skill is idempotent and cheap — there's no downside to re-running.
+
+Cline doesn't have auto-compaction, but the re-hydration ritual still applies for long sessions — invoke `run the session-start skill` when the AI's memory of files feels fuzzy.
 
 ## Procedure
 
