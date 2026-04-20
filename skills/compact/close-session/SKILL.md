@@ -55,7 +55,7 @@ Assign the next sequential `D-XXX` ID. Show the drafted entry. On approval, appe
 
 For each `src/<module>/MODULE.md` touched this session:
 
-Diff curated sections (Purpose, Public surface, Invariants, Key choices, Non-goals, Depends on / Depended on by) against the last committed version.
+Diff curated sections (Owner, Purpose, Public surface, Invariants, Key choices, Non-goals, Depends on / Depended on by) against the last committed version.
 
 Classify any changes:
 

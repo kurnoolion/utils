@@ -36,6 +36,7 @@ Example (Python):
 
 Each module has `src/<module>/MODULE.md` with the following curated sections (plus a regen-only Structure section):
 
+- **Owner** *(optional)* — single contributor owning the module; omit if shared or unassigned.
 - **Purpose** — 1-2 sentences.
 - **Public surface** — signatures + semantics. Includes trait / interface implementations callers rely on.
 - **Invariants** — what callers can count on (threading, state, ordering).
