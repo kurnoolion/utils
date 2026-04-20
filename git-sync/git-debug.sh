@@ -71,7 +71,7 @@ if grep -qE 'authentication failed|could not read username|invalid username or p
     tip "  - Confirm the repo is actually public in github.com settings."
     tip "  - Check the URL is HTTPS, not SSH (work PC shouldn't use SSH to github.com):"
     cmd "git remote -v"
-    cmd "git remote set-url origin $(grep GITHUB_HTTPS_URL $(dirname "$0")/config.sh | head -1)"
+    cmd "git remote set-url origin <GITHUB_HTTPS_URL from your config.sh>"
     tip "For PRIVATE repos you'd need a Personal Access Token in the credential store."
 fi
 
@@ -90,10 +90,10 @@ fi
 if grep -qE "does not appear to be a git repository|no such remote|remote .* does not exist" <<<"$LOWER"; then
     matched=1
     section "Missing or misnamed remote"
-    tip "Inspect what's configured and compare to config.sh expectations:"
+    tip "Inspect what's configured and compare to your config.sh expectations:"
     cmd "git remote -v"
-    tip "Re-run the setup script to restore remotes:"
-    cmd "$(dirname "$0")/setup-work.sh      # (or setup-personal.sh)"
+    tip "Re-run the setup script to restore remotes (pass your config path):"
+    cmd "$(dirname "$0")/setup-work.sh <path/to/config.sh>      # (or setup-personal.sh)"
 fi
 
 if grep -qE 'detached head' <<<"$LOWER"; then
@@ -110,25 +110,25 @@ if grep -qE "your branch is behind|your branch and .* have diverged" <<<"$LOWER"
     matched=1
     section "Branch behind / diverged"
     tip "WORK PC: just run the sync script — it fetches both remotes and merges:"
-    cmd "$(dirname "$0")/sync-work.sh"
+    cmd "$(dirname "$0")/sync-work.sh <path/to/config.sh>"
     tip "If diverged due to a stray local commit on work PC:"
     cmd "git log --oneline main..HEAD        # what's local only"
-    tip "Decide whether to keep or reset. Work PC should not author commits."
+    tip "Decide whether to keep or let sync-work.sh carry it to company git."
 fi
 
 if grep -qE 'fatal: not a git repository' <<<"$LOWER"; then
     matched=1
     section "Not inside a git repository"
-    tip "cd into the repo first. Config points to:"
-    cmd "grep REPO_DIR $(dirname "$0")/config.sh"
+    tip "cd into the repo first. Check REPO_DIR in your config.sh:"
+    cmd "grep REPO_DIR <path/to/config.sh>"
 fi
 
 if grep -qE 'pathspec .* did not match|error: pathspec' <<<"$LOWER"; then
     matched=1
     section "Unknown branch/ref"
-    tip "Check branch name (DEFAULT_BRANCH in config.sh; some repos use 'master'):"
+    tip "Check branch name (DEFAULT_BRANCH in your config.sh; some repos use 'master'):"
     cmd "git branch -a"
-    cmd "grep DEFAULT_BRANCH $(dirname "$0")/config.sh"
+    cmd "grep DEFAULT_BRANCH <path/to/config.sh>"
 fi
 
 if grep -qE 'index.lock|another git process seems to be running' <<<"$LOWER"; then

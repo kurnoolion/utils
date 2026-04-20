@@ -5,13 +5,25 @@
 #  - Push to github.com
 #
 # Usage:
-#   sync-personal.sh                 # prompts for commit message if needed
-#   sync-personal.sh "my message"    # uses the given message
+#   sync-personal.sh <config.sh>                 # prompts for commit message if needed
+#   sync-personal.sh <config.sh> "my message"    # uses the given message
+# Example:
+#   sync-personal.sh ~/scripts/config-utils.sh "fix typo"
 # ----------------------------------------------------------------------------
 set -euo pipefail
-HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck disable=SC1091
-source "$HERE/config.sh"
+
+CONFIG_PATH="${1:-}"
+if [[ -z "$CONFIG_PATH" ]]; then
+    echo "Usage: $0 <path-to-config.sh> [commit-message]" >&2
+    exit 1
+fi
+if [[ ! -f "$CONFIG_PATH" ]]; then
+    echo "ERROR: config file not found: $CONFIG_PATH" >&2
+    exit 1
+fi
+# shellcheck disable=SC1090
+source "$CONFIG_PATH"
+shift
 
 cd "$PERSONAL_REPO_DIR"
 git checkout "$DEFAULT_BRANCH"

@@ -7,10 +7,13 @@
 #  - Pushes state to company git
 #
 # Usage:
-#   setup-work.sh              # assumes company repo is EMPTY (first ever setup)
-#   setup-work.sh --existing   # company repo already has content (colleague
-#                              # commits, or a previous manual setup). Fetches
-#                              # and merges company/<branch> before pushing.
+#   setup-work.sh <config.sh>              # empty company repo (first ever setup)
+#   setup-work.sh <config.sh> --existing   # company repo already has content
+#                                          # (colleague commits, or a prior
+#                                          # manual setup). Fetches + merges
+#                                          # company/<branch> before pushing.
+# Example:
+#   setup-work.sh ~/scripts/config-utils.sh --existing
 #
 # Prerequisites:
 #  - github.com repo is public (HTTPS clone works without creds)
@@ -18,9 +21,19 @@
 #  - Company-side repo exists (empty for default mode, populated for --existing)
 # ----------------------------------------------------------------------------
 set -euo pipefail
-HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck disable=SC1091
-source "$HERE/config.sh"
+
+CONFIG_PATH="${1:-}"
+if [[ -z "$CONFIG_PATH" ]]; then
+    echo "Usage: $0 <path-to-config.sh> [--existing]" >&2
+    exit 1
+fi
+if [[ ! -f "$CONFIG_PATH" ]]; then
+    echo "ERROR: config file not found: $CONFIG_PATH" >&2
+    exit 1
+fi
+# shellcheck disable=SC1090
+source "$CONFIG_PATH"
+shift
 
 MODE="empty"
 case "${1:-}" in
@@ -32,7 +45,7 @@ esac
 for v in GITHUB_HTTPS_URL COMPANY_SSH_URL WORK_REPO_DIR; do
     val="${!v:-}"
     if [[ -z "$val" || "$val" == *"<"* ]]; then
-        echo "ERROR: config.sh has placeholder/empty value for $v" >&2
+        echo "ERROR: $CONFIG_PATH has placeholder/empty value for $v" >&2
         exit 1
     fi
 done

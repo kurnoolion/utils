@@ -4,11 +4,26 @@
 #  - Clones github.com repo (if not already present)
 #  - Sets commit identity (per-repo, not global)
 #  - Verifies remote
+#
+# Usage:
+#   setup-personal.sh <path-to-config.sh>
+# Example:
+#   setup-personal.sh ~/scripts/config-utils.sh
 # ----------------------------------------------------------------------------
 set -euo pipefail
-HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck disable=SC1091
-source "$HERE/config.sh"
+
+CONFIG_PATH="${1:-}"
+if [[ -z "$CONFIG_PATH" ]]; then
+    echo "Usage: $0 <path-to-config.sh>" >&2
+    exit 1
+fi
+if [[ ! -f "$CONFIG_PATH" ]]; then
+    echo "ERROR: config file not found: $CONFIG_PATH" >&2
+    exit 1
+fi
+# shellcheck disable=SC1090
+source "$CONFIG_PATH"
+shift
 
 # Choose HTTPS or SSH URL for personal PC. Default: SSH if configured, else HTTPS.
 PERSONAL_CLONE_URL="${GITHUB_SSH_URL:-$GITHUB_HTTPS_URL}"

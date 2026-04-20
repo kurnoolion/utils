@@ -1,7 +1,16 @@
 #!/usr/bin/env bash
 # ----------------------------------------------------------------------------
-# Shared configuration. Fill in these values. Same file layout on both PCs,
-# but PERSONAL_* and COMPANY_* values matter on different machines.
+# Template configuration. Copy this file per project (e.g. ~/scripts/config-
+# <project>.sh) and pass its full path to the setup/sync scripts:
+#
+#   setup-personal.sh ~/scripts/config-utils.sh
+#   sync-personal.sh  ~/scripts/config-utils.sh
+#   setup-work.sh     ~/scripts/config-utils.sh --existing
+#   sync-work.sh      ~/scripts/config-utils.sh
+#
+# Same field layout works on both PCs — only the relevant values are read on
+# each machine (personal reads PERSONAL_*, work reads COMPANY_* and both
+# reads GITHUB_*).
 # ----------------------------------------------------------------------------
 
 # --- Commit identity ---------------------------------------------------------
