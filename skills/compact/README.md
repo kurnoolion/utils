@@ -8,7 +8,7 @@ The name captures the core idea: memory-as-contract (a *compact* between human a
 
 ## What this is
 
-A set of 6 skills plus templates that, together, give a team:
+A set of 7 skills plus templates that, together, give a team:
 
 - **A shared ritual** — session-start to hydrate context, close-session to persist progress and decisions.
 - **Phase discipline** — explicit Requirements / Architecture / Development lenses you switch between deliberately.
@@ -43,6 +43,7 @@ Start a new Claude Code or Cline session. `session-start` will detect the uninit
 | `close-session` | Recap work; two-pass decision triage; diff-based STATUS update; MODULE.md soft/hard-flag audit; conditional `regen-map`; propose commit. Never auto-writes. |
 | `regen-map` | Regenerate `MODULE.md` Structure sections + rebuild `MAP.md` from code. Phase-aware orphan detection. Self-checking (reverts any curated-section edit). |
 | `project-init` | Run the 7-topic interview, customize 3 phase prompts from base prompts, scaffold `docs/compact/`. `--re-init` regenerates phase prompts without touching state files. |
+| `doctor` | Audit scaffold internal consistency: schema authorities, stale refs, skill inventory, step monotonicity, tool-neutral framing, path canonicalization, cross-file references. Read-only. Auto-invoked by `close-session` when scaffold files changed. |
 
 ## Artifacts produced by `project-init`
 

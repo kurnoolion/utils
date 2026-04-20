@@ -88,7 +88,15 @@ Skip this step entirely if the Contributors table has no file-based loops (all c
 - Unresolved items → write to STATUS.md **Flags** section for next session.
 - Draft commit message: short imperative; reference any new `D-XXX` IDs.
 
-### 8. Commit decision
+### 8. Scaffold consistency audit (conditional)
+
+If any file under `.claude/skills/` (or the source-repo equivalent, e.g. `skills/compact/`) changed this session, invoke the `doctor` skill.
+
+- Surface its full output verbatim.
+- On failures: user must address (fix now) or defer (note in STATUS.md Flags) before commit. `doctor` is read-only — it never auto-fixes.
+- Skip this step entirely if no scaffold files changed.
+
+### 9. Commit decision
 
 Show the full diff once more. Ask: `commit` / `stage only` / `abort`.
 

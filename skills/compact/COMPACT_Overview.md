@@ -407,6 +407,7 @@ PR review isn't just about code anymore. It's about code + the memory artifacts 
   switch-phase/SKILL.md
   close-session/SKILL.md
   regen-map/SKILL.md
+  doctor/SKILL.md
   project-init/
     SKILL.md
     base-prompts/
@@ -433,6 +434,7 @@ CLAUDE.md                  ← one-liner to auto-trigger session-start
 | `switch-phase` | Adopt requirements/architecture/development posture | When switching phases |
 | `close-session` | Persist work: decisions, status, audit | End of every session |
 | `regen-map` | Refresh MODULE.md Structure and MAP.md from code | Invoked by close-session (or manually) |
+| `doctor` | Audit the scaffold itself for drift (stale refs, schema quorum, skill inventory, tool-neutral framing) | Invoked by close-session when scaffold files changed (or manually) |
 
 ---
 

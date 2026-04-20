@@ -21,7 +21,7 @@ The name is load-bearing:
 - **Immutable decision log** — `DECISIONS.md` anchors *why* choices were made; entries are superseded, never edited.
 - **Contributors as first-class** — stakeholder interfaces (TPM, QA, domain expert, end user) are captured in `PROJECT.md` Contributors from Day 1 and drive architecture and tech-stack choices; contribution surfaces are modules, not admin-tool afterthoughts.
 
-## The five sub-skills
+## The six sub-skills
 
 | Skill | When to invoke |
 |---|---|
@@ -30,6 +30,7 @@ The name is load-bearing:
 | `switch-phase <phase>` | When shifting between `requirements` / `architecture` / `development`. |
 | `close-session` | End of every session. Triages decisions, updates STATUS, proposes commit. Never auto-writes. |
 | `regen-map` | When code structure changes. Updates MODULE.md Structure sections and `MAP.md` from code. |
+| `doctor` | Audit the scaffold itself for internal consistency. Read-only. Auto-invoked by `close-session` when scaffold files changed. |
 
 ## Standard flow for a new project
 
