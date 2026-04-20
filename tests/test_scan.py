@@ -272,6 +272,49 @@ def test_unreadable_subdir_logs_error_and_continues(tmp_path):
     assert any(p == "bad_dir" for p, _ in errors)
 
 
+def test_scandir_failure_does_not_mark_dir_complete(tmp_path, monkeypatch):
+    """Regression: a transient OSError from os.scandir (e.g. SMB network
+    blip) used to mark the directory complete, silently dropping its
+    entire subtree on resume. It must now leave the dir in the frontier.
+    """
+    import disk_cleaner.scan as scan_mod
+
+    root = tmp_path / "tree"
+    sub = root / "flaky"
+    sub.mkdir(parents=True)
+    (sub / "child.txt").write_text("hi")
+    (root / "ok.txt").write_text("ok")
+
+    real_scandir = os.scandir
+    failed = {"flaky": False}
+
+    def flaky_scandir(path):
+        if os.path.basename(str(path)) == "flaky" and not failed["flaky"]:
+            failed["flaky"] = True
+            raise OSError("simulated network blip")
+        return real_scandir(path)
+
+    monkeypatch.setattr(scan_mod.os, "scandir", flaky_scandir)
+
+    db = tmp_path / "scan.db"
+    run_scan(str(root), str(db), resume=False)
+
+    completed = {p for (p,) in _query(db, "SELECT path FROM completed_dirs")}
+    assert "flaky" not in completed, "transient scandir failure must not mark dir complete"
+
+    errors = {p for (p, _e) in _query(db, "SELECT path, error FROM scan_errors")}
+    assert "flaky" in errors
+
+    # After the blip is gone, --resume picks the dir back up.
+    monkeypatch.setattr(scan_mod.os, "scandir", real_scandir)
+    run_scan(str(root), str(db), resume=True)
+
+    paths = {p for (p,) in _query(db, "SELECT path FROM entries")}
+    assert "flaky/child.txt" in paths
+    completed = {p for (p,) in _query(db, "SELECT path FROM completed_dirs")}
+    assert "flaky" in completed
+
+
 def test_file_with_no_extension_is_misc(tmp_path):
     root = tmp_path / "tree"
     root.mkdir()

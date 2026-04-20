@@ -147,11 +147,11 @@ def _scan_one_dir(conn, rel: str, abs_path: str):
     try:
         scandir_iter = os.scandir(abs_path)
     except OSError as ex:
+        # Do NOT mark this directory as completed: a transient failure
+        # (e.g. network blip on SMB) would otherwise silently drop the
+        # entire subtree on resume. The error is recorded for triage; the
+        # dir stays in the resume frontier so the next --resume retries it.
         log_scan_error(conn, rel, f"scandir failed: {ex}")
-        with conn:
-            conn.execute(
-                "INSERT OR IGNORE INTO completed_dirs (path) VALUES (?)", (rel,)
-            )
         return 0, 0, 1, []
 
     with scandir_iter as it:
