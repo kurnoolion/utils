@@ -13,7 +13,7 @@
 
 ## Next
 
-- Fill in `docs/ai/PROJECT.md` during requirements phase.
+- Fill in `docs/compact/PROJECT.md` during requirements phase.
 
 ## Flags
 

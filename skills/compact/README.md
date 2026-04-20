@@ -41,12 +41,12 @@ Start a new Claude Code or Cline session. `session-start` will detect the uninit
 | `switch-phase` | Switch between `requirements`, `architecture`, `development` lenses. Loads phase file; updates active phase in STATUS.md. |
 | `close-session` | Recap work; two-pass decision triage; diff-based STATUS update; MODULE.md soft/hard-flag audit; conditional `regen-map`; propose commit. Never auto-writes. |
 | `regen-map` | Regenerate `MODULE.md` Structure sections + rebuild `MAP.md` from code. Phase-aware orphan detection. Self-checking (reverts any curated-section edit). |
-| `project-init` | Run the 7-topic interview, customize 3 phase prompts from base prompts, scaffold `docs/ai/`. `--re-init` regenerates phase prompts without touching state files. |
+| `project-init` | Run the 7-topic interview, customize 3 phase prompts from base prompts, scaffold `docs/compact/`. `--re-init` regenerates phase prompts without touching state files. |
 
 ## Artifacts produced by `project-init`
 
 ```
-docs/ai/
+docs/compact/
   PROJECT.md                    # 1-page what we're building (human-curated)
   STATUS.md                     # Active phase + Done / In progress / Next / Flags
   DECISIONS.md                  # Append-only ADR log (immutable entries)
@@ -79,7 +79,7 @@ Each module has a `MODULE.md` co-located with its code. Curated sections are han
 - Threading, state lifecycle, ordering guarantees.
 
 **Key choices**
-- <choice> — [D-XXX](../../docs/ai/DECISIONS.md#d-xxx)
+- <choice> — [D-XXX](../../docs/compact/DECISIONS.md#d-xxx)
 
 **Non-goals**
 - What this module deliberately does NOT do.
@@ -116,7 +116,7 @@ Re-vendor periodically: `curl -o base-prompts/<file> https://raw.githubuserconte
 
 1. User opens a new conversation in Claude Code or Cline.
 2. `CLAUDE.md` / `.clinerules` one-liner triggers `session-start`.
-3. `session-start` detects an empty `docs/ai/` and offers `/project-init`.
+3. `session-start` detects an empty `docs/compact/` and offers `/project-init`.
 4. `/project-init` runs the 7-topic interview, customizes phase prompts, scaffolds state files.
 5. `session-start` re-hydrates; user runs `/switch-phase requirements`.
 6. User iterates on `PROJECT.md`; `/close-session` commits.

@@ -1,6 +1,6 @@
 ---
 name: project-init
-description: Initialize a new project's AI scaffolding. Runs the 7-topic interview from the vendored meta-prompt, fuses answers with 3 base prompts to produce customized phase prompts (requirements/architecture/development), and scaffolds docs/ai/. Safe to decline. --re-init regenerates phase prompts only; never touches state files.
+description: Initialize a new project's AI scaffolding. Runs the 7-topic interview from the vendored meta-prompt, fuses answers with 3 base prompts to produce customized phase prompts (requirements/architecture/development), and scaffolds docs/compact/. Safe to decline. --re-init regenerates phase prompts only; never touches state files.
 ---
 
 ## Preconditions
@@ -25,10 +25,10 @@ If any base prompt is missing, abort: "Re-vendor base prompts from `github.com/k
 
 ### 1. Detect existing state
 
-Check `docs/ai/phases/*.md`, `docs/ai/PROJECT.md`, `docs/ai/STATUS.md`.
+Check `docs/compact/phases/*.md`, `docs/compact/PROJECT.md`, `docs/compact/STATUS.md`.
 
 - Fully present, no `--re-init` flag → abort with: "Project already initialized. Use `/project-init --re-init` to regenerate phase prompts without touching state."
-- `--re-init` → load `docs/ai/project-init-interview.md` (if exists) as defaults.
+- `--re-init` → load `docs/compact/project-init-interview.md` (if exists) as defaults.
 - Otherwise → fresh init.
 
 ### 2. Run the 7-topic interview
@@ -47,7 +47,7 @@ If `--re-init`, show previous answers as defaults; user may edit any.
 
 ### 3. Persist answers
 
-Write answers to `docs/ai/project-init-interview.md` with section headings per topic. This file is the source of truth for re-customization.
+Write answers to `docs/compact/project-init-interview.md` with section headings per topic. This file is the source of truth for re-customization.
 
 ### 4. Customize phase prompts
 
@@ -62,9 +62,9 @@ For each base prompt (`01-...`, `02-...`, `03-...`), apply the customization rul
 
 Write customized prompts (~400-600 words each) to:
 
-- `docs/ai/phases/requirements.md`
-- `docs/ai/phases/architecture.md`
-- `docs/ai/phases/development.md`
+- `docs/compact/phases/requirements.md`
+- `docs/compact/phases/architecture.md`
+- `docs/compact/phases/development.md`
 
 Each phase prompt must follow the 5-section schema:
 
@@ -85,17 +85,17 @@ Copy from `templates/` and fill in project-specific bits:
 
 | File | Content |
 |---|---|
-| `docs/ai/PROJECT.md` | Skeleton; user fills during requirements phase |
-| `docs/ai/STATUS.md` | `Active phase: requirements`, dated today; Next pre-populated with "Fill in PROJECT.md during requirements phase" |
-| `docs/ai/DECISIONS.md` | Empty header + comment template |
-| `docs/ai/MAP.md` | Placeholder pointing at `regen-map` |
-| `docs/ai/structure-conventions.md` | Derived from tech-stack answer (topic 2); for common stacks (Rust, Go, Python, TypeScript) produce a first draft; for polyglot or unusual stacks, scaffold with explicit prompts |
+| `docs/compact/PROJECT.md` | Skeleton; user fills during requirements phase |
+| `docs/compact/STATUS.md` | `Active phase: requirements`, dated today; Next pre-populated with "Fill in PROJECT.md during requirements phase" |
+| `docs/compact/DECISIONS.md` | Empty header + comment template |
+| `docs/compact/MAP.md` | Placeholder pointing at `regen-map` |
+| `docs/compact/structure-conventions.md` | Derived from tech-stack answer (topic 2); for common stacks (Rust, Go, Python, TypeScript) produce a first draft; for polyglot or unusual stacks, scaffold with explicit prompts |
 
 ### 6. Print summary
 
 - Files created: `<list>`
-- Interview saved to: `docs/ai/project-init-interview.md`
-- **Review `docs/ai/structure-conventions.md`** — it's derived from your tech-stack answer; confirm or edit before the first `regen-map` run.
+- Interview saved to: `docs/compact/project-init-interview.md`
+- **Review `docs/compact/structure-conventions.md`** — it's derived from your tech-stack answer; confirm or edit before the first `regen-map` run.
 - Next step: `/switch-phase requirements`
 
 ## Rules

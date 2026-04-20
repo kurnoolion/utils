@@ -9,15 +9,15 @@ Scope: whole repo by default. Optional arg: comma-separated module names to rege
 
 ## Read-only inputs
 
-- `docs/ai/structure-conventions.md` — **required**. Defines what a "module" is in this repo and how language-native visibility maps to `pub` / `internal`. Abort if missing.
-- `docs/ai/STATUS.md` — read `Active phase` for DRAFT vs ORPHANED semantics.
+- `docs/compact/structure-conventions.md` — **required**. Defines what a "module" is in this repo and how language-native visibility maps to `pub` / `internal`. Abort if missing.
+- `docs/compact/STATUS.md` — read `Active phase` for DRAFT vs ORPHANED semantics.
 - All `src/**/MODULE.md` files.
 - The codebase.
 
 ## Writeable surface — only these
 
 - The Structure section of each MODULE.md, bounded by `<!-- BEGIN:STRUCTURE -->` and `<!-- END:STRUCTURE -->` markers.
-- `docs/ai/MAP.md` (wholly derived).
+- `docs/compact/MAP.md` (wholly derived).
 
 ## Never write
 
@@ -29,7 +29,7 @@ Scope: whole repo by default. Optional arg: comma-separated module names to rege
 
 ### 1. Preflight
 
-Load `structure-conventions.md`. Apply its module-definition rule and visibility mapping. If missing, abort: "Run `/project-init` or create `docs/ai/structure-conventions.md` before running regen-map."
+Load `structure-conventions.md`. Apply its module-definition rule and visibility mapping. If missing, abort: "Run `/project-init` or create `docs/compact/structure-conventions.md` before running regen-map."
 
 Read `STATUS.md` to determine the active phase.
 
@@ -55,7 +55,7 @@ Code exists, no MODULE.md → record for summary. **Do NOT create MODULE.md.**
 
 ### 4. Regenerate MAP.md
 
-Write `docs/ai/MAP.md` with:
+Write `docs/compact/MAP.md` with:
 
 - Module table: alphabetical. Each row:
   - Module name linked to its MODULE.md

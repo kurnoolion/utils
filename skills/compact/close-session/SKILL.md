@@ -19,7 +19,7 @@ Long sessions have lossy recall — **treat the user's memory as authoritative.*
 
 ### 2. Propose STATUS.md update
 
-Load current `docs/ai/STATUS.md`. Draft diffs:
+Load current `docs/compact/STATUS.md`. Draft diffs:
 
 - Completed items: move **In progress → Done** (add today's date).
 - Add new **In progress** items started mid-session.
@@ -49,7 +49,7 @@ Present candidates as a numbered list with one-line summaries. Ask the user to m
 
 **Never fabricate rationale.** If the user can't answer a field, mark it `TODO` and add the item to STATUS.md Flags.
 
-Assign the next sequential `D-XXX` ID. Show the drafted entry. On approval, append to `docs/ai/DECISIONS.md`.
+Assign the next sequential `D-XXX` ID. Show the drafted entry. On approval, append to `docs/compact/DECISIONS.md`.
 
 ### 4. Audit MODULE.md edits
 
@@ -72,7 +72,7 @@ Surface `regen-map`'s full output, including any self-check reverts.
 
 ### 6. Produce summary
 
-- Files changed in `docs/ai/` and `src/**/MODULE.md`.
+- Files changed in `docs/compact/` and `src/**/MODULE.md`.
 - Unresolved items → write to STATUS.md **Flags** section for next session.
 - Draft commit message: short imperative; reference any new `D-XXX` IDs.
 

@@ -10,7 +10,7 @@ description: Orient yourself in a COMPACT-equipped project. Shows the methodolog
 A portable prompt/context/memory engineering framework for team-based AI-assisted software development. Works identically in Claude Code and Cline.
 
 The name is load-bearing:
-- **A compact** — a binding agreement. The markdown files in `docs/ai/` *are* the contract between human, AI, and team.
+- **A compact** — a binding agreement. The markdown files in `docs/compact/` *are* the contract between human, AI, and team.
 - **Compact** — tightly-packed, in lockstep. Keeps a team moving together when multiple people are partnered with AI on the same codebase.
 
 ## What COMPACT gives you
@@ -25,7 +25,7 @@ The name is load-bearing:
 | Skill | When to invoke |
 |---|---|
 | `session-start` | Auto at session start (via `CLAUDE.md` / `.clinerules`). Hydrates context; asks what you're working on. |
-| `project-init` | Once per project. Runs the 7-topic interview and scaffolds `docs/ai/`. |
+| `project-init` | Once per project. Runs the 7-topic interview and scaffolds `docs/compact/`. |
 | `switch-phase <phase>` | When shifting between `requirements` / `architecture` / `development`. |
 | `close-session` | End of every session. Triages decisions, updates STATUS, proposes commit. Never auto-writes. |
 | `regen-map` | When code structure changes. Updates MODULE.md Structure sections and `MAP.md` from code. |

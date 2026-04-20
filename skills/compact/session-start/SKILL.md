@@ -10,11 +10,11 @@ Hydrate enough context to be productive without burning the context window. Prog
 ### 1. Detect project state
 
 Check for:
-- `docs/ai/phases/requirements.md`
-- `docs/ai/phases/architecture.md`
-- `docs/ai/phases/development.md`
-- `docs/ai/STATUS.md`
-- `docs/ai/PROJECT.md`
+- `docs/compact/phases/requirements.md`
+- `docs/compact/phases/architecture.md`
+- `docs/compact/phases/development.md`
+- `docs/compact/STATUS.md`
+- `docs/compact/PROJECT.md`
 
 If any phase file is missing:
 
@@ -25,10 +25,10 @@ If yes → invoke `project-init`, then continue. If no → continue with whateve
 ### 2. Load Tier 1 context (read-only)
 
 Read if present:
-- `docs/ai/PROJECT.md` — 1-page what we're building
-- `docs/ai/MAP.md` — module layout + Mermaid
-- `docs/ai/STATUS.md` — current state
-- `docs/ai/phases/<active-phase>.md` — based on STATUS.md "Active phase"
+- `docs/compact/PROJECT.md` — 1-page what we're building
+- `docs/compact/MAP.md` — module layout + Mermaid
+- `docs/compact/STATUS.md` — current state
+- `docs/compact/phases/<active-phase>.md` — based on STATUS.md "Active phase"
 
 **Do not load at this stage:** `DECISIONS.md`, any `MODULE.md`, `structure-conventions.md`.
 
@@ -43,7 +43,7 @@ Display a compact briefing:
 - **In progress**: <list from STATUS.md>
 - **Next**: <list from STATUS.md>
 - **Flags from last session**: <STATUS.md "Flags" section, if non-empty>
-- **Uncommitted in docs/ai/**: <`git status --porcelain docs/ai/` summary, if any>
+- **Uncommitted in docs/compact/**: <`git status --porcelain docs/compact/` summary, if any>
 
 ### 4. Check staleness signals
 

@@ -30,7 +30,7 @@ Same skills. Same markdown. Same rituals.
 
 The name is load-bearing. Two meanings we wanted:
 
-1. **A compact** — a binding agreement. In our workflow, the markdown files in `docs/ai/` *are* the contract between human, AI, and team. Nothing important lives in chat history; everything durable is a diff-reviewed file.
+1. **A compact** — a binding agreement. In our workflow, the markdown files in `docs/compact/` *are* the contract between human, AI, and team. Nothing important lives in chat history; everything durable is a diff-reviewed file.
 2. **Compact** as in *tightly-packed, in lockstep*. The whole point is keeping a team moving together when multiple people are partnered with AI on the same codebase.
 
 The letters map to the three engineering disciplines (**C**ontext, **M**emory, **P**rompt) plus the three team values (**A**udited, **C**o-developed, **T**eam-locked).
@@ -139,7 +139,7 @@ In a team codebase, it's about **role-appropriate prompts at each phase of work*
 
 ## Prompt engineering in our system
 
-Three phase prompts live in `docs/ai/phases/`:
+Three phase prompts live in `docs/compact/phases/`:
 
 | Phase | Posture |
 |---|---|
@@ -166,9 +166,9 @@ project-init runs:
   └─────────────────────┘     └────────┬─────────┘
                                        │
                                        ▼
-                  docs/ai/phases/requirements.md
-                  docs/ai/phases/architecture.md
-                  docs/ai/phases/development.md
+                  docs/compact/phases/requirements.md
+                  docs/compact/phases/architecture.md
+                  docs/compact/phases/development.md
 ```
 
 The customizer injects your domain, stack, team structure, constraints, and pain points. You don't write prompts — you answer questions.
@@ -222,7 +222,7 @@ We could let Claude handle memory internally. We chose not to. Three reasons:
 ## The memory files (every project)
 
 ```
-docs/ai/
+docs/compact/
 ├── PROJECT.md              # What we're building (1 page, stable)
 ├── STATUS.md               # Current state: Done/In-progress/Next/Flags
 ├── DECISIONS.md            # Append-only ADR log (D-001, D-002, …)
@@ -352,7 +352,7 @@ Every session follows the same shape:
 
 ## Review surface
 
-Every session close produces a **diff in `docs/ai/`** that a teammate can skim.
+Every session close produces a **diff in `docs/compact/`** that a teammate can skim.
 
 - What was worked on? → `STATUS.md`
 - What decisions got made? → `DECISIONS.md`
@@ -380,7 +380,7 @@ PR review isn't just about code anymore. It's about code + the memory artifacts 
     base-prompts/
     templates/
 
-docs/ai/                   ← created by project-init
+docs/compact/                   ← created by project-init
   PROJECT.md  STATUS.md  DECISIONS.md  MAP.md
   structure-conventions.md  project-init-interview.md
   phases/{requirements,architecture,development}.md
@@ -423,7 +423,7 @@ CLAUDE.md                  ← one-liner to auto-trigger session-start
 **Goal:** adopt the right posture for the work you're about to do.
 
 - Argument: `requirements | architecture | development`
-- Reads `docs/ai/phases/<phase>.md`
+- Reads `docs/compact/phases/<phase>.md`
 - Updates `STATUS.md` active phase line
 - Announces: "Active phase: X. Posture: Y."
 
@@ -465,7 +465,7 @@ CLAUDE.md                  ← one-liner to auto-trigger session-start
 **Goal:** turn a fresh repo into a working project in one guided interview.
 
 1. Runs the 7-topic interview (from vendored meta-prompt).
-2. Persists answers to `docs/ai/project-init-interview.md`.
+2. Persists answers to `docs/compact/project-init-interview.md`.
 3. Customizes the 3 phase prompts (fuses your answers with base templates).
 4. Scaffolds `PROJECT.md`, `STATUS.md`, `DECISIONS.md`, `MAP.md`, `structure-conventions.md`.
 5. Tells you: "Next step: `/switch-phase requirements`".
@@ -545,13 +545,13 @@ Claude: [project-init runs]
 
 ```
 Claude: [writes files]
-  ✓ docs/ai/phases/{requirements,architecture,development}.md
-  ✓ docs/ai/PROJECT.md (skeleton)
-  ✓ docs/ai/STATUS.md (active phase: requirements)
-  ✓ docs/ai/DECISIONS.md (empty)
-  ✓ docs/ai/MAP.md (placeholder)
-  ✓ docs/ai/structure-conventions.md (derived from stack)
-  ✓ docs/ai/project-init-interview.md (your answers)
+  ✓ docs/compact/phases/{requirements,architecture,development}.md
+  ✓ docs/compact/PROJECT.md (skeleton)
+  ✓ docs/compact/STATUS.md (active phase: requirements)
+  ✓ docs/compact/DECISIONS.md (empty)
+  ✓ docs/compact/MAP.md (placeholder)
+  ✓ docs/compact/structure-conventions.md (derived from stack)
+  ✓ docs/compact/project-init-interview.md (your answers)
 
   "Initialized. Review structure-conventions.md — it's Claude's guess
    from your stack. Next step: /switch-phase requirements"
@@ -632,7 +632,7 @@ A URL shortener. Small enough to see end-to-end.
 - `.claude/skills/` copied from the shared scaffold.
 - `CLAUDE.md` has: *"At the start of any new conversation, invoke the `session-start` skill."*
 
-No `docs/ai/` yet. No code.
+No `docs/compact/` yet. No code.
 
 ---
 
@@ -927,7 +927,7 @@ When `close-session` proposes a change:
 **Recommended Cline settings** for our workflow:
 
 - **Auto-approve reads**: on (safe).
-- **Auto-approve writes in `docs/ai/`**: **off**. Every memory-file edit should be human-reviewed. That's the whole point of the system.
+- **Auto-approve writes in `docs/compact/`**: **off**. Every memory-file edit should be human-reviewed. That's the whole point of the system.
 - **Auto-approve code writes**: off initially; loosen as trust builds.
 
 ---
@@ -936,7 +936,7 @@ When `close-session` proposes a change:
 
 - **Context window**: the internal LLM has its own limits. Tier 1 progressive loading keeps us well under, but watch phase-file size if you customize heavily.
 - **Thinking mode**: leave reasoning **on** for architecture and development phases. The think-time pays for itself on design work.
-- **`.clineignore`**: works like `.gitignore`. **Do not** add `docs/ai/` or `MODULE.md` to it — Cline needs to see them to hydrate context.
+- **`.clineignore`**: works like `.gitignore`. **Do not** add `docs/compact/` or `MODULE.md` to it — Cline needs to see them to hydrate context.
 - **Workspace state**: Cline keeps chat history per workspace. If you reuse a workspace for a different project, clear history first to avoid cross-project contamination.
 - **`.clinerules` precedence**: team-level `.clinerules` in the repo overrides any global user rules. That's what we want — project shapes behavior, not user setup.
 
@@ -947,7 +947,7 @@ When `close-session` proposes a change:
 The repo is the source of truth. Both tools read the same files.
 
 - **Skills updates**: when the shared scaffold changes, copy again into `.claude/skills/`. Both tools pick it up next session.
-- **Phase prompt tweaks**: edit `docs/ai/phases/*.md`. Applies identically in both tools.
+- **Phase prompt tweaks**: edit `docs/compact/phases/*.md`. Applies identically in both tools.
 - **Model differences**: don't paper over them. If Claude Code produces one style and Cline another, capture it in `structure-conventions.md` or as a DECISION; don't fork the system.
 
 **Rule of thumb**: if a fix only works in one tool, the fix is wrong. The scaffold should be tool-agnostic.
@@ -982,7 +982,7 @@ Both files (`CLAUDE.md`, `.clinerules`) can coexist in the same repo — harmles
 
 - [ ] Read this deck.
 - [ ] Install your tool: Claude Code (personal) **and/or** Cline (work).
-- [ ] Read one project's `docs/ai/` end-to-end.
+- [ ] Read one project's `docs/compact/` end-to-end.
 - [ ] Open a conversation, let `session-start` brief you.
 - [ ] Practice `switch-phase` and `close-session` on a small task.
 - [ ] If you use both tools: run the same session in Claude Code and Cline — confirm the experience matches.
@@ -997,7 +997,7 @@ Both files (`CLAUDE.md`, `.clinerules`) can coexist in the same repo — harmles
 A: It fires automatically via the CLAUDE.md one-liner. If you skip it, you lose context hydration.
 
 **Q: What if I forget `close-session`?**
-A: Next session you'll see stale STATUS and possibly uncommitted `docs/ai/`. `session-start` flags both. No data loss, just friction.
+A: Next session you'll see stale STATUS and possibly uncommitted `docs/compact/`. `session-start` flags both. No data loss, just friction.
 
 **Q: Can I edit `MODULE.md` by hand?**
 A: Yes — curated sections (Purpose, Public surface, Invariants, Key choices, Non-goals). Never the Structure section (regen-map owns it).
@@ -1022,7 +1022,7 @@ A: ~5-10 min of overhead per session. Payoff: codebase stays auditable, team sta
 A: No. Use Claude Code for personal work, Cline for work machines. The scaffold and all artifacts are identical — a project started in one tool is fully usable in the other.
 
 **Q: Cline isn't picking up my skills. What do I check?**
-A: (1) Scaffold is at `.claude/skills/` not `.cline/skills/`. (2) `.clinerules` exists at repo root and mentions `session-start`. (3) `.clineignore` isn't excluding `.claude/` or `docs/ai/`. (4) Restart the Cline chat to re-read `.clinerules`.
+A: (1) Scaffold is at `.claude/skills/` not `.cline/skills/`. (2) `.clinerules` exists at repo root and mentions `session-start`. (3) `.clineignore` isn't excluding `.claude/` or `docs/compact/`. (4) Restart the Cline chat to re-read `.clinerules`.
 
 ---
 
@@ -1047,7 +1047,7 @@ This system is **v1**. Every failure mode we hit is data:
 - **Two rituals**: session-start, close-session.
 - **One rule**: propose, don't write. Everything is diff-reviewed.
 
-If you remember nothing else: **the files in `docs/ai/` are the contract. Read them; edit them; review them in PRs — in whichever tool you're using.**
+If you remember nothing else: **the files in `docs/compact/` are the contract. Read them; edit them; review them in PRs — in whichever tool you're using.**
 
 ---
 
