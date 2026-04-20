@@ -19,6 +19,7 @@ The name is load-bearing:
 - **Shared rituals** — `session-start` hydrates context; `close-session` persists decisions, status, and audit findings as diff-reviewed changes.
 - **Auditable code** — `MODULE.md` per module (curated contract + regen-generated structure), plus a regenerated `MAP.md` so AI-generated code is never a black box.
 - **Immutable decision log** — `DECISIONS.md` anchors *why* choices were made; entries are superseded, never edited.
+- **Contributors as first-class** — stakeholder interfaces (TPM, QA, domain expert, end user) are captured in `PROJECT.md` Contributors from Day 1 and drive architecture and tech-stack choices; contribution surfaces are modules, not admin-tool afterthoughts.
 
 ## The five sub-skills
 

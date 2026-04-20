@@ -103,6 +103,17 @@ Each module has a `MODULE.md` co-located with its code. Curated sections are han
 - **Detect, don't auto-resolve.** Drift, orphans, and phase-boundary violations are surfaced — humans decide.
 - **Deterministic regeneration.** `regen-map` output is byte-identical for byte-identical input. Diffs reflect real changes only.
 - **Immutable decision log.** `DECISIONS.md` entries are never edited; they're superseded by new entries with forward/backward links.
+- **Contributors drive design.** Stakeholder interfaces (web UIs, intake forms, correction queues) are first-class modules — not admin-tool afterthoughts.
+
+## Contributors as design driver
+
+AI-assisted projects fail when only devs can contribute. COMPACT pulls stakeholder involvement to Day 1: the `/project-init` interview captures **every** stakeholder (TPM, QA, domain expert, end user) with their contribution type, required interface, and feedback loop. That table goes into `PROJECT.md` and drives:
+
+- **Architecture** — every non-trivial contribution surface becomes a first-class module with its own `MODULE.md`, designed doc-first.
+- **Tech stack** — must support the interfaces stakeholders need (a CLI-only stack can't serve a TPM who needs a web UI; the mismatch surfaces during the interview).
+- **Sessions** — `close-session` scans file-based contribution drop-paths each session and surfaces new stakeholder artifacts for review.
+
+See the `Contributors` table in `PROJECT.md` (worked example in `project-init/templates/PROJECT.md`).
 
 ## Vendored base prompts
 

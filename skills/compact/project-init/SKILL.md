@@ -36,12 +36,14 @@ Check `docs/compact/phases/*.md`, `docs/compact/PROJECT.md`, `docs/compact/STATU
 Read `base-prompts/00-swdev-project-customizer.md` for interview structure. Present all 7 topics as a single batch for the user to answer in one pass:
 
 1. **What we're building** — system description, core problem
-2. **How we're building** — tech stack, frameworks, dependencies
-3. **Team & contribution structure** — roles across design / development / validation / correction / evaluation
+2. **How we're building** — tech stack, frameworks, dependencies; module convention + visibility mapping (feeds `structure-conventions.md`)
+3. **Stakeholder map & contribution surfaces** — for every stakeholder (devs, TPMs, QA, domain experts, end users): role, technical comfort, contribution type, required interface, and feedback loop. Drives Contributors table, architecture (surfaces as modules), and tech-stack choices.
 4. **Domain constraints** — regulation, real-time needs, compliance, data sensitivity
 5. **LLM access model** — runtime data / artifact visibility; restrictions if any
 6. **Pain points** — common failures; what AI should catch
 7. **Artifact preferences** — documentation, design, requirements formats
+
+**Cross-topic check during the interview:** if topic 3 names stakeholders needing a UI / form / review queue and topic 2's stack can't support it, surface the gap and resolve before generating phase prompts.
 
 If `--re-init`, show previous answers as defaults; user may edit any.
 
@@ -51,14 +53,7 @@ Write answers to `docs/compact/project-init-interview.md` with section headings 
 
 ### 4. Customize phase prompts
 
-For each base prompt (`01-...`, `02-...`, `03-...`), apply the customization rules from `00-swdev-project-customizer.md`:
-
-- Inject domain terminology naturally (not appended).
-- Add stack-specific guidance only where it materially changes behavior.
-- Inject team-role/contribution structure from topic 3.
-- If LLM access is limited (topic 5), augment with remote-collaboration patterns: diagnostic CLI, compact pasteable reports, structured error codes and fingerprints.
-- Align output contracts with artifact preferences (topic 7).
-- Calibrate EIP weighting by team experience level.
+For each base prompt (`01-...`, `02-...`, `03-...`), follow **all rules** in `00-swdev-project-customizer.md` — Customization rules, Base-section → 5-section mapping, Contribution surfaces as first-class design, Progressive loading, Sibling skills, Observability scaling, EIP calibration, and the per-phase wiring sections. The customizer is the single source of truth; this skill is the orchestrator that runs it.
 
 Write customized prompts (~400-600 words each) to:
 

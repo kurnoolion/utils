@@ -289,6 +289,37 @@ The biggest risk with AI-generated code is that we ship what we can't review. Ou
 5. **Deterministic regeneration.** Same input → byte-identical output.
 6. **Immutable decision log.** Decisions are superseded, never edited.
 7. **Phases as lenses, not states.** Switch freely; low friction.
+8. **Contributors drive design, not the other way around.** Stakeholder interfaces are first-class modules — not admin-tool afterthoughts.
+
+---
+
+## Principle 8 — Contributors as design driver
+
+AI-assisted development isn't just devs + the LLM. Real projects have TPMs writing requirements, QA supplying eval sets, domain experts correcting AI output, end users giving UI feedback. If we only design for devs, the rest have no contribution path — and the system degrades.
+
+COMPACT pulls this forward to Day 1:
+
+- **Topic 3 of `/project-init`** asks for every stakeholder, what they contribute, what interface they need, and how their contribution reaches the pipeline.
+- **`PROJECT.md` Contributors table** captures all of the above — *before* any code is written.
+- **Architecture phase** treats each contribution surface (web UI, intake form, correction queue) as a first-class module with its own `MODULE.md`, designed doc-first.
+- **Tech stack (topic 2)** is constrained by what topic 3 demands — a CLI-only stack can't serve a TPM who needs a web UI. Mismatches surface during the interview.
+- **`close-session`** scans file-based contribution drop-paths each session and surfaces new stakeholder-provided artifacts for review.
+
+The failure mode this prevents: a pilot that technically works but has no way for non-dev stakeholders to correct, validate, or extend — so it never graduates past the dev team.
+
+---
+
+## Example Contributors table
+
+| Stakeholder / Role | Contributes | Interface | Feedback loop |
+|---|---|---|---|
+| Dev team | Code, design, reviews | Direct git | Normal PR flow |
+| QA team | Eval sets, failure cases | `contributions/eval/*.yaml` drop | Ingested by CI on merge |
+| TPM | Requirements clarifications | Web UI at `/admin/requirements` | Staged edits → dev review → `PROJECT.md` |
+| Domain expert | Corrections on AI output | Structured form w/ diff view | Writes to `contributions/corrections/`, reviewed at close-session |
+| End user | UI feedback, bug reports | In-app widget | Issue tracker → weekly triage |
+
+Missing rows (unowned validation, no correction path, no eval channel) are v1 risks — surfaced in Open questions.
 
 ---
 
