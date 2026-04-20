@@ -170,6 +170,9 @@ Match phrasing to the team experience level throughout — don't just tag abstra
 - **Scale observability** by topic 4 + topic 6.
 - **Reference sibling skills** in every phase prompt's Do section.
 - **Keep the 5-section schema** — `switch-phase` depends on it.
+- **Dissolve the base's "Context intake" section into the 5-section schema** — file lists go into `Load when entering` (using COMPACT artifact names); conflict-handling guidance goes into `Do`; limited-access guidance consolidates into the `Conditional: Limited LLM access` augmentations (don't duplicate inline + conditional).
+- **Translate "flag conflicts" into COMPACT mechanisms** — decision-level conflicts → supersede via a new `D-XXX` entry in `DECISIONS.md` with a backward link; cross-phase conflicts (e.g. implementation reveals a requirements gap) → `/switch-phase` back deliberately, don't silently evolve.
+- **Name the cross-session handoff channel** — where the base says "session summaries from earlier work," the generated prompt says `STATUS.md` Flags.
 - Keep the structured-prose hybrid: bold section headers with concise natural language inside.
 
 ---
