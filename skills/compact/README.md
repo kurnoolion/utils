@@ -12,7 +12,7 @@ A set of 6 skills plus templates that, together, give a team:
 
 - **A shared ritual** — session-start to hydrate context, close-session to persist progress and decisions.
 - **Phase discipline** — explicit Requirements / Architecture / Development lenses you switch between deliberately.
-- **An auditable code map** — `MODULE.md` files co-located with code, plus a regenerated `MAP.md` so Claude's output isn't a black box.
+- **An auditable code map** — `MODULE.md` files co-located with code, plus a regenerated `MAP.md` so AI-generated code isn't a black box.
 - **A decision log** — ADR-style `DECISIONS.md` where non-obvious choices are anchored; linked from `MODULE.md` for grounded "why" queries.
 
 Designed to work identically across Claude Code (Anthropic) and Cline (any model, including team-internal LLMs). Both tools read `.claude/skills/` and share the `SKILL.md` format.

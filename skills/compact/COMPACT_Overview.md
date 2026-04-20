@@ -402,6 +402,7 @@ PR review isn't just about code anymore. It's about code + the memory artifacts 
 
 ```
 .claude/skills/            ← copied from the shared scaffold
+  compact/SKILL.md
   session-start/SKILL.md
   switch-phase/SKILL.md
   close-session/SKILL.md
