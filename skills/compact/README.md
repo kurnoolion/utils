@@ -19,17 +19,22 @@ Designed to work identically across Claude Code (Anthropic) and Cline (any model
 
 ## Installation
 
-Copy this directory's contents to `.claude/skills/` in a project repo:
+Copy this directory's contents to `.claude/skills/` in a project repo (same path for both tools):
 
 ```bash
 cp -r /home/mohan/work/utils/skills/compact/. /path/to/project/.claude/skills/
 ```
 
-Add to the project's `CLAUDE.md` (and mirror to `.clinerules` if Cline doesn't read `CLAUDE.md` in your setup):
+Add the auto-trigger one-liner. Tools read different files, so pick based on which tool(s) the team uses — both can coexist harmlessly in the same repo:
+
+- **Claude Code users:** create `CLAUDE.md` at repo root.
+- **Cline users:** create `.clinerules` at repo root.
 
 ```
 At the start of any new conversation, invoke the `session-start` skill.
 ```
+
+**Cline also requires:** the VS Code Cline extension installed and its model provider configured (Base URL, API key, model ID). See `COMPACT_Overview.md` Part 8 for the full Cline setup — extension, provider config, `.clineignore`, and auto-approve settings (keep writes in `docs/compact/` **off** auto-approve — every memory-file edit should be human-reviewed).
 
 Start a new Claude Code or Cline session. `session-start` will detect the uninitialized project and offer to run `/project-init`.
 
@@ -128,6 +133,8 @@ The `project-init/base-prompts/` directory contains snapshots of the prompt libr
 Re-vendor periodically: `curl -o base-prompts/<file> https://raw.githubusercontent.com/kurnoolion/prompts-lib/main/<file>` or invoke `project-init --fetch-latest`.
 
 ## First-run flow
+
+Slash-command syntax below is Claude Code. In Cline, invoke the same skills by natural request — e.g. `run the project-init skill`, `run the switch-phase skill with arg architecture`. See `COMPACT_Overview.md` Part 8 for the full Cline mapping.
 
 1. User opens a new conversation in Claude Code or Cline.
 2. `CLAUDE.md` / `.clinerules` one-liner triggers `session-start`.

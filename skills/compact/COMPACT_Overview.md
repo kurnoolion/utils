@@ -927,7 +927,8 @@ At the start of any new conversation, invoke the session-start skill.
 
 Skills live in .claude/skills/<skill-name>/SKILL.md. Read the SKILL.md
 to understand how to invoke each skill. Available skills:
-  - session-start, switch-phase, close-session, regen-map, project-init
+  - compact, session-start, switch-phase, close-session,
+    regen-map, project-init, doctor
 ```
 
 Cline reads `.clinerules` when a conversation starts. No other config needed.
@@ -941,10 +942,12 @@ Cline doesn't have Claude Code's native `/slash-command` shortcut, so skills are
 | Action | Claude Code | Cline |
 |---|---|---|
 | Start session | Auto (via `CLAUDE.md`) | Auto (via `.clinerules`) |
+| Orientation / refresher | `/compact` | `run the compact skill` |
 | Init project | `/project-init` | `run the project-init skill` |
 | Switch phase | `/switch-phase architecture` | `run the switch-phase skill with arg architecture` |
 | Close session | `/close-session` | `run the close-session skill` |
 | Regen map | `/regen-map` | `run the regen-map skill` |
+| Audit scaffold | `/doctor` | `run the doctor skill` |
 
 Cline reads the matching `SKILL.md` and follows it identically. The experience is the same; only the command form differs.
 
