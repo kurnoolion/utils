@@ -2,7 +2,7 @@
 marp: true
 theme: default
 paginate: true
-header: 'AI-Assisted SW Dev — Team Training'
+header: 'COMPACT — Team Training'
 footer: 'Internal use'
 style: |
   section { font-size: 22px; }
@@ -15,12 +15,25 @@ style: |
 <!-- _class: lead -->
 <!-- _paginate: false -->
 
-# AI-Assisted SW Dev
+# COMPACT
 
 ### A shared workflow for prompt, context, and memory engineering
 
-**One system, two tools:** Claude Code (personal) + Cline (work, internal LLM).
+**C**ontext · **M**emory · **P**rompt — **A**udited, **C**o-developed, **T**eam-locked.
+
+One system, two tools: Claude Code (personal) + Cline (work, internal LLM).
 Same skills. Same markdown. Same rituals.
+
+---
+
+## Why "COMPACT"?
+
+The name is load-bearing. Two meanings we wanted:
+
+1. **A compact** — a binding agreement. In our workflow, the markdown files in `docs/ai/` *are* the contract between human, AI, and team. Nothing important lives in chat history; everything durable is a diff-reviewed file.
+2. **Compact** as in *tightly-packed, in lockstep*. The whole point is keeping a team moving together when multiple people are partnered with AI on the same codebase.
+
+The letters map to the three engineering disciplines (**C**ontext, **M**emory, **P**rompt) plus the three team values (**A**udited, **C**o-developed, **T**eam-locked).
 
 ---
 
@@ -835,7 +848,7 @@ Goal: one scaffold that travels with you.
 2. Authenticate: `claude login`.
 3. In your project repo:
    ```bash
-   cp -r /path/to/shared/skills/. .claude/skills/
+   cp -r /path/to/shared/skills/compact/. .claude/skills/
    ```
 4. Add to `CLAUDE.md` at repo root (create if missing):
    ```
@@ -869,7 +882,7 @@ That's it. You're in the workflow.
 Same skills scaffold copy as Claude Code:
 
 ```bash
-cp -r /path/to/shared/skills/. .claude/skills/
+cp -r /path/to/shared/skills/compact/. .claude/skills/
 ```
 
 Create **`.clinerules`** at the project root (Cline's equivalent of `CLAUDE.md`):
@@ -950,7 +963,7 @@ The repo is the source of truth. Both tools read the same files.
 1. Clone/create the project repo.
 2. Copy the skills scaffold:
    ```bash
-   cp -r /path/to/shared/skills/. .claude/skills/
+   cp -r /path/to/shared/skills/compact/. .claude/skills/
    ```
 3. **Claude Code users**: create `CLAUDE.md` at repo root with:
    ```

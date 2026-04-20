@@ -1,6 +1,10 @@
-# AI SW Dev Skills
+# COMPACT
 
-Portable skills scaffold for Claude Code and Cline. Provides a prompt/context/memory engineering framework for team-based AI-assisted software development.
+**C**ontext · **M**emory · **P**rompt — **A**udited, **C**o-developed, **T**eam-locked.
+
+A portable prompt/context/memory engineering framework for team-based AI-assisted software development. Works identically in Claude Code and Cline.
+
+The name captures the core idea: memory-as-contract (a *compact* between human and AI) and tightly-packed team lockstep.
 
 ## What this is
 
@@ -15,10 +19,10 @@ Designed to work identically across Claude Code (Anthropic) and Cline (any model
 
 ## Installation
 
-Copy this directory to `.claude/skills/` in a project repo:
+Copy this directory's contents to `.claude/skills/` in a project repo:
 
 ```bash
-cp -r /home/mohan/work/utils/skills/. /path/to/project/.claude/skills/
+cp -r /home/mohan/work/utils/skills/compact/. /path/to/project/.claude/skills/
 ```
 
 Add to the project's `CLAUDE.md` (and mirror to `.clinerules` if Cline doesn't read `CLAUDE.md` in your setup):
