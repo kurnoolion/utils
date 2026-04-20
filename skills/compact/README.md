@@ -8,7 +8,7 @@ The name captures the core idea: memory-as-contract (a *compact* between human a
 
 ## What this is
 
-A set of 5 skills plus templates that, together, give a team:
+A set of 6 skills plus templates that, together, give a team:
 
 - **A shared ritual** — session-start to hydrate context, close-session to persist progress and decisions.
 - **Phase discipline** — explicit Requirements / Architecture / Development lenses you switch between deliberately.
@@ -37,6 +37,7 @@ Start a new Claude Code or Cline session. `session-start` will detect the uninit
 
 | Skill | Purpose |
 |---|---|
+| `compact` | Orientation only. Prints the methodology overview and points to the sub-skills. Read-only. Invoke when onboarding or for a refresher. |
 | `session-start` | Hydrate session: load PROJECT/MAP/STATUS + active phase file; surface state; ask intent; load task-specific `MODULE.md` on demand. |
 | `switch-phase` | Switch between `requirements`, `architecture`, `development` lenses. Loads phase file; updates active phase in STATUS.md. |
 | `close-session` | Recap work; two-pass decision triage; diff-based STATUS update; MODULE.md soft/hard-flag audit; conditional `regen-map`; propose commit. Never auto-writes. |
@@ -122,6 +123,10 @@ Re-vendor periodically: `curl -o base-prompts/<file> https://raw.githubuserconte
 6. User iterates on `PROJECT.md`; `/close-session` commits.
 7. Next session: `/switch-phase architecture`; draft `MODULE.md` skeletons; `/close-session` captures decisions; `/regen-map` updates MAP.
 8. Subsequent sessions: `/switch-phase development`; implement against the contracts in `MODULE.md`; `/close-session` audits.
+
+## Overview deck
+
+`COMPACT_Overview.md` in this directory is a Marp presentation that walks a team through the methodology, workflow, and dual-tool (Claude Code + Cline) setup. Render with `marp COMPACT_Overview.md -o COMPACT_Overview.pptx`, or open in VS Code with the Marp extension for live preview.
 
 ## Status
 

@@ -51,5 +51,5 @@ Do not invoke other skills from here. Do not modify files. The point of this ski
 ## Further reading
 
 - `README.md` in this scaffold — full reference and design principles.
-- `TRAINING.md` — Marp deck walking through concepts, workflow, dry run, and dual-tool setup.
+- `COMPACT_Overview.md` — Marp deck walking through concepts, workflow, dry run, and dual-tool setup.
 - `DECISIONS.md` in any initialized project — the project's immutable decision log.

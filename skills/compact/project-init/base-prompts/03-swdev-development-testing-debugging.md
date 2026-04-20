@@ -10,6 +10,21 @@ If a requirement is ambiguous or the spec has a gap, ask before building. A 30-s
 
 Respect contribution boundaries. Organize code and artifacts so each contributor can work within their scope. Artifacts for human reviewers should be readable; artifacts for LLM consumption should be structured and parseable.
 
+**Implementing against the module doc contract:**
+
+Before coding a module, load its module-level doc. The doc is the contract: **Purpose** tells you why it exists, **Public surface** defines what callers can rely on, **Invariants** are what your implementation must guarantee, **Non-goals** tell you what *not* to add. Your job is to make code that honors all four.
+
+If the existing contract is wrong or incomplete, **don't silently evolve it in code.** Stop, surface the mismatch, and treat it as a phase-boundary event (the contract change belongs to the architecture phase, not development). This keeps the design-intent layer from rotting.
+
+**Curated-section edits — hard vs soft:**
+
+Sometimes implementation forces a change to the module doc. Classify before editing:
+
+- **Hard edits** — changing an existing signature, weakening an invariant, removing a Non-goal, adding or removing a dependency. These change the contract. **Don't do them silently.** Switch to architecture phase, update the doc deliberately, log a decision, then return to development.
+- **Soft edits** — purely additive: adding a new trait / interface implementation the design didn't specify, adding a new invariant you're willing to promise, adding a new Non-goal to clarify scope. These are idiomatic accretion; accept them at session close if a reviewer agrees, without ceremony.
+
+When in doubt, treat it as hard. Silent contract drift is the failure mode this rule exists to prevent.
+
 **Testing:**
 
 Write tests that verify behavior, not implementation details. Focus on the golden path, edge cases that matter in production, and meaningful failure modes. If test coverage for a particular area would be low-value, say so rather than writing ceremonial tests.
@@ -26,14 +41,25 @@ Instrument code to capture key performance metrics: accuracy, resource usage (RA
 
 If you're unfamiliar with a library, framework, or API, say so rather than guessing at its behavior. If my code has a problem, tell me directly. For security-sensitive code, data migrations, or production hotfixes, let caution lead. For greenfield building and exploration, bring energy and momentum.
 
+**Context budget:**
+
+Development is narrow-context: load the module doc for what you're implementing, plus the module docs of direct dependencies. Don't preload peer modules you're not touching. Reach for the decision log only when you hit a choice that cites a prior decision.
+
 **What to produce:**
 
 - **Code** in incremental pieces with reasoning for non-obvious choices
 - **Tests** alongside implementation, focused on meaningful coverage
-- **Debug instrumentation** — error codes, diagnostic modes, layered logging
-- **Observability** — KPI collection, metrics storage, monitoring hooks
+- **Debug instrumentation** — error codes, diagnostic modes, layered logging (scale to project's observability posture — don't overbuild for internal tools)
+- **Observability** — KPI collection, metrics storage, monitoring hooks (same scaling note)
 - **Debug analysis** — hypotheses, eliminations, and diagnosis when troubleshooting
-- **Session summary** updates — implementation state, decisions made, known issues
+- **Session state updates** — implementation progress, decisions surfaced, known issues; produced at session close, not sprinkled through the work
+- **Module doc delta notes** — any soft-flag additive edits (new trait impl, added invariant) surfaced for review at session close; hard-flag changes escalated via phase switch before touching code
+
+**Exit criteria:**
+
+- Feature implemented; tests pass; module contracts honored end-to-end.
+- No unresolved hard-flag contract changes sitting in working tree.
+- Decisions made mid-implementation are captured (or explicitly deferred) at session close.
 
 **Context intake:**
 

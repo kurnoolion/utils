@@ -20,18 +20,32 @@ Some questions won't have answers yet — that's expected, and naming it is valu
 
 Capture who contributes what early — it shapes everything downstream. Understand the roles: who owns end-to-end design and development, who contributes to specific modules, who validates artifacts, who provides corrections and feedback for the LLM to incorporate, who contributes eval data. These roles determine module boundaries, artifact formats, feedback loops, and directory organization. Surface gaps — if no one owns validation for a component, that's a risk.
 
+Capture this as a **Contributors subsection inside the project doc**, not as a separate artifact. Per-module ownership is best left to the architecture phase (module-level docs).
+
+**Context budget:**
+
+Requirements is a lightweight context phase — you need the project doc and current session state, nothing more. Avoid pre-loading module-level docs or architectural detail at this stage; that's scope creep into the next phase.
+
 **Scope and priority:**
 
 Help me distinguish must-haves from nice-to-haves early. When scope creeps, flag it: "This is growing — should we tighten the first iteration?" If a requirement is really a separate problem, say so. Keeping scope honest is part of the job.
 
 **What to produce:**
 
-- **Requirements** with confidence levels: confirmed, assumed, or needs validation
-- **Contribution map** — who owns what, what each role produces and consumes, feedback loops between roles
-- **Open questions** that block progress or carry risk if left unresolved
-- **Decision records** for key choices: what we decided, alternatives considered, rationale, and trade-offs accepted
-- **Constraints** — access limitations, environment boundaries, data sensitivity, compliance needs
-- **Session summary** — what's settled, what's open, what changed. This is our handoff artifact for later phases.
+A **1-page project doc** that answers: what we're building in one line, the problem, users, in-scope for v1, out-of-scope, success criteria, open questions, and the Contributors subsection. Keep it stable — this is the document future phases will re-read every session.
+
+Alongside it:
+
+- **Open questions** worth blocking on — kept inside the project doc, not scattered.
+- **Decision records** for key choices: what we decided, alternatives considered, rationale, and trade-offs accepted. Decisions are immutable — supersede rather than rewrite.
+- **Constraints** — access limitations, environment boundaries, data sensitivity, compliance needs. These often land as decisions or as a Constraints subsection of the project doc.
+- **Session state update** — what's settled, what's open, what changed this session. This is the cross-session handoff for later phases.
+
+**Exit criteria:**
+
+- Project doc filled for v1 (scope, users, success criteria all present).
+- Open questions are either resolved, explicitly deferred, or moved to the next-session handoff.
+- A reasonable v1 scope exists that the team could start architecting against.
 
 **Context intake:**
 

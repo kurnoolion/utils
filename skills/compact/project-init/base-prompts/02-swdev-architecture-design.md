@@ -12,6 +12,31 @@ When you make a design choice, show the trade-off: what this buys us, what it co
 
 Structure modules, directories, and interfaces around the contribution map from requirements. Contributors who own specific modules need clear boundaries and well-defined contracts. Artifacts consumed by human reviewers need readable formats; artifacts consumed by the LLM need structured, parseable formats. Design feedback loops explicitly — how do human corrections and validations flow back into the system?
 
+**Designing modules doc-first:**
+
+Design happens in docs, not code. For every planned module, draft a module-level doc *before* any code exists. The doc is the contract other modules depend on.
+
+Each module doc should capture, at minimum:
+
+- **Purpose** — 1-2 sentences; why this module exists.
+- **Public surface** — the functions / types / interfaces callers can rely on, with semantics (not just signatures). Include trait / interface implementations callers depend on (e.g., "implements Clone") — those are part of the contract.
+- **Invariants** — what callers can count on: threading model, state lifecycle, ordering guarantees.
+- **Key choices** — non-obvious design decisions, each linked to the decision log.
+- **Non-goals** — what this module deliberately does NOT do.
+- **Depends on** / **Depended on by** — the edges of the dependency graph.
+
+Leave implementation structure (classes, methods, internal helpers) for later — a regen step or development phase will populate that from code.
+
+**Decisions are immutable:**
+
+Decisions you log now are the project's canon. Don't rewrite old decisions — if the world changes, supersede them with a new entry that links back. Each decision captures Context, Decision, Why, and Consequences; alternatives considered if the choice was close.
+
+Filter for what's decision-worthy: reversing would cost a meaningful engineering day, a reviewer would ask "why not X?", multiple options were considered, or the choice affects module boundaries or public APIs. Skip style choices and obvious defaults — decision fatigue is real.
+
+**Context budget:**
+
+Architecture is a deeper-context phase than requirements — you'll reference the project doc, existing module docs, and the dependency map. But work **one module at a time**. Load peer module docs only when designing an interface they own; don't preload everything.
+
 **Observability & instrumentation:**
 
 Design observability as a first-class cross-cutting concern, not an afterthought. Define what gets measured: accuracy, resource usage (RAM/CPU/disk — peak and average), throughput (requests per second), response times (user-facing and LLM API), and domain-specific quality metrics. Design the metrics storage (persistent DB, schema, retention) and collection mechanism. These measurements drive optimization decisions — caching, scaling, resource allocation.
@@ -28,11 +53,19 @@ If I've brought requirements or prior decisions that constrain the design, work 
 
 **What to produce:**
 
-- **Design decisions** with alternatives considered and trade-offs accepted
-- **Layered artifacts** — data model, component/service boundaries, interfaces, cross-cutting concerns, organized by contribution boundaries
-- **Observability design** — metrics, storage schema, collection mechanism, and the optimization decisions they inform
-- **Risk register** — genuine risks with severity and mitigation, not an exhaustive worry list
-- **Session summary** — design state, open questions, and constraints for handoff
+- **Module docs** drafted doc-first for every planned module (Purpose / Public surface / Invariants / Key choices / Non-goals / Depends on / Depended on by). Leave the implementation-structure section bounded by its regen markers but empty.
+- **Decision records** for every non-obvious choice — immutable ADR-style entries with sequential IDs, referenced from the module doc's Key choices.
+- **Layered design artifacts** — data model, service boundaries, cross-cutting concerns; each anchored in the module doc it belongs to rather than a separate sprawling architecture document.
+- **Observability design** — metrics, storage schema, collection mechanism, and the optimization decisions they inform. (Skip or trim if observability isn't load-bearing for this project.)
+- **Risk register** — genuine risks with severity and mitigation, not an exhaustive worry list.
+- **Session state update** — design progress, open architectural questions, and constraints for the next session.
+
+**Exit criteria:**
+
+- Every planned module has a drafted module doc (the curated sections — structure can come later from code).
+- Dependency graph is acyclic, or each cycle is justified in a decision record.
+- Every non-obvious choice is anchored in the decision log.
+- A developer picking up a module should be able to read its doc and know what to implement without re-deriving the reasoning.
 
 **Context intake:**
 

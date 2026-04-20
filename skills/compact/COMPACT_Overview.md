@@ -2,7 +2,7 @@
 marp: true
 theme: default
 paginate: true
-header: 'COMPACT — Team Training'
+header: 'COMPACT — Overview'
 footer: 'Internal use'
 style: |
   section { font-size: 22px; }
@@ -395,6 +395,7 @@ CLAUDE.md                  ← one-liner to auto-trigger session-start
 
 | Skill | What it does | When to invoke |
 |---|---|---|
+| `compact` | Orientation only — prints this methodology overview and points to the sub-skills | When onboarding or for a refresher |
 | `project-init` | 7-topic interview; produces phase prompts + scaffolding | Once, at project creation |
 | `session-start` | Hydrate context; ask what you're working on | Start of every conversation |
 | `switch-phase` | Adopt requirements/architecture/development posture | When switching phases |
@@ -1067,13 +1068,13 @@ This file is **Marp** markdown. To produce a `.pptx`:
 npm install -g @marp-team/marp-cli
 
 # render
-marp TRAINING.md -o TRAINING.pptx
+marp COMPACT_Overview.md -o COMPACT_Overview.pptx
 
 # or render to PDF / HTML
-marp TRAINING.md -o TRAINING.pdf
-marp TRAINING.md -o TRAINING.html
+marp COMPACT_Overview.md -o COMPACT_Overview.pdf
+marp COMPACT_Overview.md -o COMPACT_Overview.html
 ```
 
-Or: open `TRAINING.md` in VS Code with the Marp extension for live preview.
+Or: open `COMPACT_Overview.md` in VS Code with the Marp extension for live preview.
 
 The markdown source is the authoritative version — edit it, re-render when needed.
