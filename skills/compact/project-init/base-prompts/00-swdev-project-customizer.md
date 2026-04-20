@@ -35,7 +35,7 @@ The phase prompts will be loaded alongside these files. Every "what to produce" 
 | `docs/compact/DECISIONS.md` | Append-only ADR log; sequential `D-XXX` IDs; immutable (supersede via new entry with backward link) | `close-session` via two-pass triage |
 | `docs/compact/MAP.md` | Module table + Mermaid dependency diagram | `regen-map` (mechanical) |
 | `docs/compact/structure-conventions.md` | What's a module; visibility mapping | Human, set at project-init |
-| `src/<module>/MODULE.md` | Per-module contract: Purpose / Public surface / Invariants / Key choices (`[D-XXX]`) / Non-goals / Structure (regen) / Depends on / Depended on by | Human (curated sections); `regen-map` (Structure section only) |
+| `src/<module>/MODULE.md` | Per-module contract: (optional) Owner / Purpose / Public surface / Invariants / Key choices (`[D-XXX]`) / Non-goals / Structure (regen) / Depends on / Depended on by | Human (curated sections); `regen-map` (Structure section only) |
 
 **Filter for DECISIONS.md entries:** reversing costs >1 day / a reviewer would ask "why not X?" / multiple options considered / affects module boundaries or public APIs / deliberate perf/correctness/security tradeoff.
 
@@ -98,6 +98,7 @@ Use `01-swdev-requirement-gathering.md`, `02-swdev-architecture-design.md`, and 
 ### architecture.md — wiring
 
 - **Artifacts**: **doc-first `src/<module>/MODULE.md`** skeletons for every planned module (curated sections filled; `<!-- BEGIN:STRUCTURE --> / <!-- END:STRUCTURE -->` markers present but empty). Non-obvious choices become `DECISIONS.md` entries with `D-XXX` IDs, linked from MODULE.md's Key choices. `MAP.md` is regen-generated — never hand-edit. Session state via `/close-session`.
+- **Risk disposition**: COMPACT has no separate risk register. Durable design risks become `DECISIONS.md` entries with the risk and mitigation captured in Consequences. Time-boxed watch-items (e.g. "monitor latency after launch") become `STATUS.md` Flags. The generated `architecture.md` must not prescribe a standalone risk artifact.
 - **Exit criteria**: every planned module has a MODULE.md draft; dependency graph is acyclic (or each cycle justified in a DECISIONS entry); `/regen-map` output is clean.
 
 ### development.md — wiring
@@ -160,6 +161,23 @@ Match phrasing to the team experience level throughout — don't just tag abstra
 
 ---
 
+## Base-section → 5-section schema mapping
+
+The base prompts (01/02/03) use flat sections. When generating phase files, translate deterministically:
+
+| Base prompt section | 5-section schema target | Notes |
+|---|---|---|
+| `Context budget` | `Load when entering` | Substitute COMPACT artifact names (`PROJECT.md`, `STATUS.md`, `MODULE.md`, etc.). |
+| `Context intake` | dissolve → `Load when entering` + `Do` + `Conditional: Limited LLM access` | Don't keep a standalone section. Don't duplicate limited-access guidance inline + conditional. |
+| `What to produce` | `Artifacts` | Swap generic artifact names for COMPACT names per the artifacts table. |
+| `Exit criteria` | `Exit criteria` | Direct. |
+| `What I don't want` | `Don't` | Convert first-person ("I don't want X") to imperative bullets ("Don't do X"). |
+| Behavior prose (Approach / Writing code / Testing / Challenging assumptions / etc.) | split between `Posture` (stance, 1-2 lines) and `Do` (bulleted behaviors) | Sibling-skill references go into `Do`. |
+
+The output must contain **exactly** the 5 schema sections — no leftover "Context intake" or "What to produce" headings.
+
+---
+
 ## Customization rules
 
 - **Inject domain terminology naturally** — weave it in; don't append.
@@ -169,10 +187,11 @@ Match phrasing to the team experience level throughout — don't just tag abstra
 - **Calibrate EIP by team experience** per the table above.
 - **Scale observability** by topic 4 + topic 6.
 - **Reference sibling skills** in every phase prompt's Do section.
-- **Keep the 5-section schema** — `switch-phase` depends on it.
-- **Dissolve the base's "Context intake" section into the 5-section schema** — file lists go into `Load when entering` (using COMPACT artifact names); conflict-handling guidance goes into `Do`; limited-access guidance consolidates into the `Conditional: Limited LLM access` augmentations (don't duplicate inline + conditional).
+- **Keep the 5-section schema** — `switch-phase` depends on it. See the mapping table above for deterministic section translation.
 - **Translate "flag conflicts" into COMPACT mechanisms** — decision-level conflicts → supersede via a new `D-XXX` entry in `DECISIONS.md` with a backward link; cross-phase conflicts (e.g. implementation reveals a requirements gap) → `/switch-phase` back deliberately, don't silently evolve.
 - **Name the cross-session handoff channel** — where the base says "session summaries from earlier work," the generated prompt says `STATUS.md` Flags.
+- **Canonical DECISIONS filter** — the filter at the top of this document ("reversing costs >1 day / reviewer would ask why-not-X / multiple options / affects boundaries or public APIs / deliberate tradeoff") is authoritative. When generating `architecture.md`, strip any inline filter wording from base 02 and use this version.
+- **`Owner` line on `MODULE.md` is optional but standard** — when topic-3 surfaces per-module ownership, the generated `architecture.md` instructs contributors to add `**Owner**: <name>` as the first line above `**Purpose**` in affected `MODULE.md` files. Treat this as an additive field; not required for modules without a single owner.
 - Keep the structured-prose hybrid: bold section headers with concise natural language inside.
 
 ---

@@ -69,6 +69,8 @@ Each module has a `MODULE.md` co-located with its code. Curated sections are han
 ```markdown
 # <module>
 
+**Owner**: <name>          <!-- optional; add when a single contributor owns the module -->
+
 **Purpose**
 1-2 sentences.
 
