@@ -165,11 +165,63 @@ So you can scan from Linux (`/mnt/nas/share`) and clean up from Windows (`\\nas\
 - **No hash-based dedup in v1** — too slow for 18 TB. Could be added as a separate pass later.
 - **Re-scanning after cleanup** is not the intended workflow. Cleanup is a one-shot. If you need to re-scan, use a fresh DB.
 
+## Troubleshooting
+
+The DB is plain SQLite — when something looks off, query it directly. All recipes assume `nas.db` in the current directory.
+
+### Verify a scan covered every folder
+
+```powershell
+python -c "import sqlite3; c=sqlite3.connect('nas.db'); folders=c.execute(\"SELECT COUNT(*) FROM entries WHERE kind='folder'\").fetchone()[0]; done=c.execute('SELECT COUNT(*) FROM completed_dirs').fetchone()[0]; missing=c.execute(\"SELECT path FROM entries WHERE kind='folder' AND path NOT IN (SELECT path FROM completed_dirs)\").fetchall(); print(f'folders={folders} completed={done+1} (incl. root)'); print('incomplete:', missing if missing else 'none')"
+```
+
+`incomplete: none` means every known folder was fully enumerated. `+1` accounts for the empty-string root path which is in `completed_dirs` but not in `entries`.
+
+### Inspect scan errors
+
+```powershell
+python -c "import sqlite3; c=sqlite3.connect('nas.db'); rows=c.execute('SELECT path, error FROM scan_errors').fetchall(); print(f'{len(rows)} errors:'); [print(' ', p, '-', e) for p,e in rows]"
+```
+
+`scandir failed: ...` rows are directories the tool couldn't enumerate — usually a transient network blip on SMB. Permission-denied on individual files appears as `stat failed: ...`.
+
+### Recover from a network blip mid-scan
+
+If `scan_errors` shows `scandir failed: ...` rows, the tool now leaves those folders in the resume frontier — just rerun with `--resume` and they'll be retried:
+
+```powershell
+python -m disk_cleaner scan --root <root> --db nas.db --resume
+```
+
+If you have an **older DB** scanned before this fix (where failed folders were incorrectly marked complete), re-queue them once before resuming:
+
+```powershell
+python -c "import sqlite3; c=sqlite3.connect('nas.db'); n=c.execute(\"DELETE FROM completed_dirs WHERE path IN (SELECT path FROM scan_errors WHERE error LIKE 'scandir failed:%')\").rowcount; c.commit(); print(f'requeued {n} folders')"
+
+python -m disk_cleaner scan --root <root> --db nas.db --resume
+```
+
+### Resume across OSes (WSL → PowerShell, etc.)
+
+Just point `--root` at the new path. The DB stores POSIX-relative paths and re-anchors automatically. You'll see a one-line warning on resume; the original root is preserved in `scan_meta` and the new one is recorded as `scan_root_resumed_as`.
+
+```powershell
+python -m disk_cleaner scan --root \\nas\share --db nas.db --resume
+```
+
+### Check cleanup state
+
+```powershell
+python -c "import sqlite3; c=sqlite3.connect('nas.db'); rows=c.execute('SELECT status, COUNT(*) FROM moves GROUP BY status').fetchall(); [print(f'  {s}: {n}') for s,n in rows]"
+```
+
+Failed rows can be inspected with `SELECT rel_path, error FROM moves WHERE status='failed'`. Re-running `cleanup` retries them automatically.
+
 ## Project layout
 
 ```
 utils/
-├── README.md
+├── README_DISK_CLEANER.md
 ├── DISK_CLEANER_SUMMARY.md     # project state, decisions, progress
 ├── pyproject.toml              # pytest config only
 ├── disk_cleaner/
