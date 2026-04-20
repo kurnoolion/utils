@@ -586,7 +586,7 @@ Claude: [writes files]
   ✓ docs/compact/structure-conventions.md (derived from stack)
   ✓ docs/compact/project-init-interview.md (your answers)
 
-  "Initialized. Review structure-conventions.md — it's Claude's guess
+  "Initialized. Review structure-conventions.md — it's the AI's guess
    from your stack. Next step: /switch-phase requirements"
 ```
 
@@ -641,7 +641,7 @@ You write code. Tests honor the invariants. When a decision emerges mid-code (no
 
 Invoke `/close-session` before you stop:
 
-1. **Recap** — you correct Claude's summary.
+1. **Recap** — you correct the AI's summary.
 2. **STATUS update** — review diff, approve.
 3. **Triage decisions** — numbered list; mark log/skip/unsure.
 4. **Capture logged decisions** — plain-language Q&A.

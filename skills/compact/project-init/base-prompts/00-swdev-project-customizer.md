@@ -201,7 +201,7 @@ The output must contain **exactly** the 5 schema sections — no leftover "Conte
 - **Inject domain terminology naturally** — weave it in; don't append.
 - **Stack-specific guidance** only where it materially changes behavior.
 - **Match artifact formats** to the team's conventions (topic 7), but never drop COMPACT's artifact names / schemas — those are fixed.
-- **Contribution structure** (topic 3) → `PROJECT.md` Contributors subsection; per-module ownership optionally in `MODULE.md` as an "Owner" line above Purpose.
+- **Stakeholder map** (topic 3) → `PROJECT.md` Contributors table with all four columns populated (see the "Contribution surfaces as first-class design" section above for full wiring).
 - **Calibrate EIP by team experience** per the table above.
 - **Scale observability** by topic 4 + topic 6.
 - **Reference sibling skills** in every phase prompt's Do section.
