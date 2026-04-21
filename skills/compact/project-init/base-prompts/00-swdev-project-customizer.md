@@ -71,6 +71,8 @@ Each phase has a different context budget. Bake this into "Load when entering":
 - **architecture**: `PROJECT.md`, `STATUS.md`, `MAP.md`, `structure-conventions.md`, plus `MODULE.md` for the module(s) being designed. Load `requirements.md` on demand (when checking a design element against its behavioral spec). Load peer MODULE.md files only when designing an interface they own.
 - **development**: `STATUS.md`, the `MODULE.md` for the module being implemented, plus any MODULE.md the work directly depends on. `requirements.md` is **Tier-2 (on-demand)** — loaded by `drift-check`, or when the session task explicitly concerns a specific requirement. Not loaded by default. Skip everything else.
 
+*Note:* The phase prompt file itself — `phases/<phase>.md` — is Tier 1 for its phase. It's loaded by `/switch-phase` and re-loaded by `/session-start` (including after Claude Code auto-compaction), and persists in context for the duration of the phase. It's intentionally omitted from the `Load when entering` lists above to avoid circular self-reference.
+
 ## Sibling skills to reference in every phase prompt
 
 Under "Do" in each generated prompt, mention the skills the user will invoke:
