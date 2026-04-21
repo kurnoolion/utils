@@ -133,7 +133,7 @@ Each layer has different concerns, different failure modes, and different remedi
 
 In isolation, prompt engineering is about one task.
 
-In a team codebase, it's about **role-appropriate prompts at each phase of work**: requirements is a different posture than architecture, which is a different posture than development.
+In a team codebase, it's about **role-appropriate prompts at each phase of work**: requirements is a different persona than architecture, which is a different persona than development.
 
 ---
 
@@ -141,7 +141,7 @@ In a team codebase, it's about **role-appropriate prompts at each phase of work*
 
 Three phase prompts live in `docs/compact/phases/`:
 
-| Phase | Posture |
+| Phase | Persona |
 |---|---|
 | **Requirements** | Help user articulate *what* and *why*. Ask, don't design. |
 | **Architecture** | Decide *how* at module level. Draft MODULE.md doc-first. No code. |
@@ -223,19 +223,22 @@ We could let Claude handle memory internally. We chose not to. Three reasons:
 
 ```
 docs/compact/
-├── PROJECT.md              # What we're building (1 page, stable)
-├── STATUS.md               # Current state: Done/In-progress/Next/Flags
+├── PROJECT.md              # Identity: who / why / scope (1 page, stable)
+├── requirements.md         # Behavioral specs: FR / NFR / Deferred
+├── STATUS.md               # Current state: Done/In-progress/Next/Flags + drift-check marker
 ├── DECISIONS.md            # Append-only ADR log (D-001, D-002, …)
 ├── MAP.md                  # Module layout + dependency diagram (regen)
 ├── structure-conventions.md # What's a module in THIS repo
 ├── project-init-interview.md # Your answers to the 7-topic interview
 └── phases/
-    ├── requirements.md     # Phase prompts (customized per project)
+    ├── requirements.md     # Phase prompts (customized per project) — the AI's persona
     ├── architecture.md
     └── development.md
 
 src/<module>/MODULE.md      # Co-located module docs
 ```
+
+`docs/compact/requirements.md` (behavioral specs) is distinct from `docs/compact/phases/requirements.md` (the requirements-phase AI persona). Specs are *what*; the phase prompt is *how the AI behaves when working on them*.
 
 Every file has a purpose. Every file is plain markdown.
 
@@ -346,9 +349,10 @@ Everyone reads and writes the same files.
 | File | Who updates it | When |
 |---|---|---|
 | `PROJECT.md` | Human, in Requirements phase | On scope change |
-| `STATUS.md` | `close-session` skill | Every session close |
-| `DECISIONS.md` | `close-session` via Q&A | When decisions made |
-| `MODULE.md` curated sections | Human, in Architecture phase | When contracts change |
+| `requirements.md` | Human, in Requirements phase; `drift-check` on approved resolutions | On behavior spec change |
+| `STATUS.md` | `close-session` skill; `drift-check` updates the drift-check marker | Every session close |
+| `DECISIONS.md` | `close-session` via Q&A; `drift-check` appends new ADRs when resolving drift | When decisions made |
+| `MODULE.md` curated sections | Human, in Architecture phase; `drift-check` on approved resolutions | When contracts change |
 | `MODULE.md` Structure section | `regen-map` skill | When code changes |
 | `MAP.md` | `regen-map` skill | When modules change |
 
@@ -365,7 +369,7 @@ Every session follows the same shape:
          │
          ▼
 ┌─────────────────┐
-│  switch-phase   │  Adopt the right posture
+│  switch-phase   │  Adopt the right persona
 └────────┬────────┘
          │
          ▼
@@ -407,6 +411,7 @@ PR review isn't just about code anymore. It's about code + the memory artifacts 
   switch-phase/SKILL.md
   close-session/SKILL.md
   regen-map/SKILL.md
+  drift-check/SKILL.md
   doctor/SKILL.md
   project-init/
     SKILL.md
@@ -414,7 +419,7 @@ PR review isn't just about code anymore. It's about code + the memory artifacts 
     templates/
 
 docs/compact/                   ← created by project-init
-  PROJECT.md  STATUS.md  DECISIONS.md  MAP.md
+  PROJECT.md  requirements.md  STATUS.md  DECISIONS.md  MAP.md
   structure-conventions.md  project-init-interview.md
   phases/{requirements,architecture,development}.md
 
@@ -431,10 +436,11 @@ CLAUDE.md                  ← one-liner to auto-trigger session-start
 | `compact` | Orientation only — prints this methodology overview and points to the sub-skills | When onboarding or for a refresher |
 | `project-init` | 7-topic interview; produces phase prompts + scaffolding. `--retrofit` for existing codebases (seeds MODULE.md skeletons + initial MAP.md) | Once, at project creation |
 | `session-start` | Hydrate context; ask what you're working on | Start of every conversation |
-| `switch-phase` | Adopt requirements/architecture/development posture | When switching phases |
-| `close-session` | Persist work: decisions, status, audit | End of every session |
+| `switch-phase` | Adopt requirements/architecture/development persona | When switching phases |
+| `close-session` | Persist work: decisions, status, audit; soft drift-check nudge when layers were touched | End of every session |
 | `regen-map` | Refresh MODULE.md Structure and MAP.md from code | Invoked by close-session (or manually) |
-| `doctor` | Audit the scaffold itself for drift (stale refs, schema quorum, skill inventory, tool-neutral framing) | Invoked by close-session when scaffold files changed (or manually) |
+| `drift-check` | Detect + resolve drift across R/D/I layers (requirements vs design vs implementation). Interactive; never auto-fixes | When close-session nudges, or on demand |
+| `doctor` | Audit the scaffold itself for drift (stale refs, schema quorum, skill inventory, tool-neutral framing, step-reference resolution) | Auto-invoked by close-session every session (or manually) |
 
 ---
 
@@ -455,12 +461,12 @@ CLAUDE.md                  ← one-liner to auto-trigger session-start
 
 ## switch-phase
 
-**Goal:** adopt the right posture for the work you're about to do.
+**Goal:** adopt the right persona for the work you're about to do.
 
 - Argument: `requirements | architecture | development`
 - Reads `docs/compact/phases/<phase>.md`
 - Updates `STATUS.md` active phase line
-- Announces: "Active phase: X. Posture: Y."
+- Announces: "Active phase: X. Persona: Y."
 
 **Rule:** thin orchestrator. All substance lives in the phase files, so they're editable without touching the skill.
 
@@ -533,6 +539,34 @@ CLAUDE.md                  ← one-liner to auto-trigger session-start
 
 ---
 
+## drift-check
+
+**Goal:** keep requirements, design, and implementation aligned — surface mismatches, let the user pick which layer changes.
+
+Three layers, three distinct artifacts:
+
+| Layer | Artifact |
+|---|---|
+| **R**equirements | `docs/compact/requirements.md` — FR-N / NFR-N / Deferred |
+| **D**esign | `MODULE.md` curated sections + DECISIONS entries |
+| **I**mplementation | Code under `src/` |
+
+**Modes:**
+
+- `/drift-check requirements` — session / recent commits vs `requirements.md`
+- `/drift-check design` — MODULE.md + architecture ADRs vs `requirements.md`
+- `/drift-check dev-full` — all modules' code vs their MODULE.md
+- `/drift-check dev-module <name>` — one module vs its MODULE.md
+- `/drift-check all` — R → D → I, with user approval at each descent
+
+**Behavior:** each drift gets a per-item resolution prompt showing `file:line` evidence on both sides. The user picks direction — update layer A, update layer B, specify both, skip, or mark deferred. Never auto-decides; never auto-cascades.
+
+**Deferred ≠ drift.** Each artifact has its own `## Deferred` section. Drift-check surfaces deferred items as one-line notes, not findings that need action.
+
+**Soft nudge at close-session.** When a session touches multiple layers, `close-session` suggests a relevant drift-check mode. Non-blocking — `skip` to commit.
+
+---
+
 ## MODULE.md schema
 
 Per-module, co-located at `src/<module>/MODULE.md`:
@@ -590,8 +624,8 @@ You: yes
 Claude: [project-init runs]
   Interview (7 topics, answer in one batch):
   1. What we're building?
-  2. Tech stack?
-  3. Team structure?
+  2. How we're building? (stack + module convention)
+  3. Stakeholder map & contribution surfaces?
   4. Domain constraints?
   5. LLM access model?
   6. Pain points?
@@ -606,6 +640,7 @@ Claude: [project-init runs]
 Claude: [writes files]
   ✓ docs/compact/phases/{requirements,architecture,development}.md
   ✓ docs/compact/PROJECT.md (skeleton)
+  ✓ docs/compact/requirements.md (skeleton — FR / NFR / Deferred)
   ✓ docs/compact/STATUS.md (active phase: requirements)
   ✓ docs/compact/DECISIONS.md (empty)
   ✓ docs/compact/MAP.md (placeholder)
@@ -620,23 +655,22 @@ Claude: [writes files]
 
 ## Requirements phase
 
-**Posture:** help user articulate *what*. Ask, don't design.
+**Persona:** help user articulate *what*. Ask, don't design.
 
-You and Claude iterate on `PROJECT.md`:
-- Who uses this?
-- What's in scope for v1?
-- What's explicitly out of scope?
-- Success criteria?
+You and Claude iterate on two files:
 
-Claude drives clarifying questions. You refine answers. Open questions list at the bottom tracks the work.
+- **`PROJECT.md`** — identity: who / why / scope boundaries. Who uses this? What's in scope for v1? What's out of scope? Contributors table.
+- **`requirements.md`** — testable specs. Functional behaviors (`FR-1`, `FR-2`, …), non-functional constraints (`NFR-1`, `NFR-2`, …), and a Deferred section for postponed items.
 
-**Exit criteria:** stakeholders agree on scope; open questions empty (or deferred).
+Claude drives clarifying questions. You refine answers. IDs are stable — removed requirements are struck through in place, never renumbered.
+
+**Exit criteria:** stakeholders agree on scope; open questions empty (or deferred); v1 FR set populated plus the NFRs the domain demands.
 
 ---
 
 ## Architecture phase
 
-**Posture:** decide *how* at module level. No code yet.
+**Persona:** decide *how* at module level. No code yet.
 
 You draft `src/<module>/MODULE.md` **doc-first**. For each module:
 - Purpose
@@ -653,7 +687,7 @@ Non-obvious choices become `DECISIONS.md` entries immediately.
 
 ## Development phase
 
-**Posture:** implement against the contracts you set in architecture.
+**Persona:** implement against the contracts you set in architecture.
 
 You write code. Tests honor the invariants. When a decision emerges mid-code (non-trivial, not idiomatic), you capture it at session close.
 
@@ -673,7 +707,10 @@ Invoke `/close-session` before you stop:
 4. **Capture logged decisions** — plain-language Q&A.
 5. **MODULE.md audit** — soft/hard flags on curated-section edits.
 6. **Regen-map** — only if structure changed.
-7. **Commit** — review full diff; commit / stage / abort.
+7. **Contribution drop-path scan** — surface new stakeholder artifacts (e.g. `contributions/eval/*.yaml`); route/defer/reject.
+8. **Drift-check nudge** — soft, one-line suggestion if the session touched multiple R/D/I layers or drift-check is stale. `skip` to continue.
+9. **Scaffold audit** — runs `/doctor` if any `.claude/skills/` files changed.
+10. **Commit** — review full diff; commit / stage / abort.
 
 **Never skip close-session.** It's where the memory gets made.
 
@@ -727,20 +764,30 @@ Claude: [writes phase prompts + scaffolding]
 ```
 Me: /switch-phase requirements
 
-Claude: "Active phase: requirements. Posture: clarify what, not how."
+Claude: "Active phase: requirements. Persona: clarify what, not how.
+         Two files get curated here:
+           - PROJECT.md     — identity (who / why / scope boundaries)
+           - requirements.md — behavioral specs (FR / NFR)"
 
-Me: Let's fill out PROJECT.md.
+Me: Let's start with PROJECT.md.
 
-Claude: "Scale? In-process single-node or distributed?
-         Do short codes expire?
-         Who owns the mapping persistence?"
+Claude: "Who are the users? What's out of scope for v1?
+         Any non-goals worth stating up front?"
 
-Me: (answers; iterates with Claude)
+Me: (answers; iterates)
 
-Claude: [drafts PROJECT.md]
+Claude: [drafts PROJECT.md — identity only]
+
+Me: Now requirements.md.
+
+Claude: "Walk me through each behavior; I'll assign FR-N / NFR-N."
+
+Me: (POST /shorten, GET /<code>, latency target, single binary...)
+
+Claude: [drafts requirements.md with FR-1..FR-N, NFR-1..NFR-N]
 ```
 
-Result: `PROJECT.md` with one-line pitch, problem, users, scope, non-goals, success criteria, no open questions.
+Result: `PROJECT.md` (identity) + `requirements.md` (testable specs). Split keeps identity stable while specs evolve.
 
 ---
 
@@ -749,21 +796,45 @@ Result: `PROJECT.md` with one-line pitch, problem, users, scope, non-goals, succ
 ```markdown
 # Project: Shorty
 
+*Identity: who / why / scope boundaries. Behavioral specs
+live in requirements.md.*
+
 **One-line**: Self-hostable URL shortener with in-memory
 storage and HTTP API.
 
 **Users**: Developers running internal tools or demos.
 
 **In scope for v1**:
-- POST /shorten — accept long URL, return short code
-- GET /<code> — 301 redirect
+- URL shortening + redirect
 - In-memory storage (single process)
 
 **Out of scope**:
 - Persistent storage (v2)
 - Custom codes, expiration, analytics, auth
 
-**Success criteria**: single binary, <100ms p99, 10K mappings
+**Success criteria**: single binary; meets NFRs in requirements.md
+```
+
+---
+
+## Dry run: step 2 — requirements.md result
+
+```markdown
+# Requirements
+
+## Functional
+- **FR-1** — POST /shorten accepts a long URL and returns
+            a unique short code.
+- **FR-2** — GET /<code> 301-redirects to the original URL.
+- **FR-3** — Short codes are 7 chars, base62.
+
+## Non-functional
+- **NFR-1** — p99 redirect latency <100ms at 10K mappings.
+- **NFR-2** — No code served before its mapping is stored.
+- **NFR-3** — Single binary; no external deps at v1.
+
+## Deferred
+<!-- (none yet) -->
 ```
 
 `/close-session`. STATUS updated. No decisions yet.
@@ -956,7 +1027,7 @@ stale so Tier 1 state is reloaded from disk.
 Skills live in .claude/skills/<skill-name>/SKILL.md. Read the SKILL.md
 to understand how to invoke each skill. Available skills:
   - compact, session-start, switch-phase, close-session,
-    regen-map, project-init, doctor
+    regen-map, drift-check, project-init, doctor
 ```
 
 Cline reads `.clinerules` when a conversation starts. No other config needed. Cline doesn't auto-compact, so the re-invocation is manual when the team spots staleness (model referring to files by recall instead of re-reading).
@@ -975,6 +1046,7 @@ Cline doesn't have Claude Code's native `/slash-command` shortcut, so skills are
 | Switch phase | `/switch-phase architecture` | `run the switch-phase skill with arg architecture` |
 | Close session | `/close-session` | `run the close-session skill` |
 | Regen map | `/regen-map` | `run the regen-map skill` |
+| Drift check | `/drift-check <mode>` | `run the drift-check skill with arg <mode>` |
 | Audit scaffold | `/doctor` | `run the doctor skill` |
 
 Cline reads the matching `SKILL.md` and follows it identically. The experience is the same; only the command form differs.
@@ -1091,6 +1163,9 @@ A: Yes — curated sections (Purpose, Public surface, Invariants, Key choices, N
 
 **Q: What if I disagree with a decision Claude recorded?**
 A: Decisions are immutable. Add a new one marking the old as `Superseded by`. History stays intact.
+
+**Q: How do I make sure requirements, design, and code stay aligned?**
+A: `/drift-check` with a mode: `requirements`, `design`, `dev-full`, `dev-module <name>`, or `all` for a guided R→D→I cascade. Each mismatch is shown with `file:line` evidence on both sides; you pick the direction (update A, update B, specify both, skip, or mark deferred). Never auto-fixes. `close-session` emits a soft nudge when a session touched multiple layers — non-blocking, `skip` to commit.
 
 **Q: What if the phase prompts don't fit my project's quirks?**
 A: Run `/project-init --re-init`. Answers preserved as defaults; edit and regenerate.

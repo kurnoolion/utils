@@ -38,7 +38,7 @@ Read if present:
 - `docs/compact/STATUS.md` — current state
 - `docs/compact/phases/<active-phase>.md` — based on STATUS.md "Active phase"
 
-**Do not load at this stage:** `DECISIONS.md`, any `MODULE.md`, `structure-conventions.md`.
+**Do not load at this stage:** `DECISIONS.md`, any `MODULE.md`, `structure-conventions.md`, `requirements.md`. `requirements.md` is Tier-2 — loaded on demand by `drift-check`, or when the session task explicitly concerns requirements.
 
 Target budget: ≤5K tokens for Tier 1.
 
@@ -51,6 +51,7 @@ Display a compact briefing:
 - **In progress**: <list from STATUS.md>
 - **Next**: <list from STATUS.md>
 - **Flags from last session**: <STATUS.md "Flags" section, if non-empty>
+- **Last drift-check**: <STATUS.md `Last drift-check:` marker, if present — otherwise "never">
 - **Uncommitted in docs/compact/**: <`git status --porcelain docs/compact/` summary, if any>
 
 ### 4. Check staleness signals
@@ -68,7 +69,7 @@ Flag any of:
 
 - Task references specific modules → load their `MODULE.md` files.
 - Task clearly doesn't match active phase → suggest `/switch-phase <x>`. **Do not auto-switch.**
-- Task is vague → ask clarifying questions per active phase's posture.
+- Task is vague → ask clarifying questions per active phase's persona.
 - User wants general Q&A with no phase → skip phase adoption.
 
 ### 7. Confirm ready

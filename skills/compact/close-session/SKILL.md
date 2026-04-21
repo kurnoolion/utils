@@ -57,12 +57,12 @@ For each `src/<module>/MODULE.md` touched this session:
 
 **Retrofit skeleton grace.** If the file begins with `<!-- retrofit: skeleton -->`, it's a `project-init --retrofit`-seeded skeleton in the process of being curated. Curated-section edits are expected, not flag-worthy. Surface a one-line note ("curating retrofit skeleton: <module>") and skip the hard/soft classification. If the session's edits fully populate the curated sections (no TODO placeholders remain), prompt: "This MODULE.md looks curated. Remove the `<!-- retrofit: skeleton -->` sentinel so future audits apply normal rules?"
 
-For all other MODULE.md files, diff curated sections (Owner, Purpose, Public surface, Invariants, Key choices, Non-goals, Depends on / Depended on by) against the last committed version.
+For all other MODULE.md files, diff curated sections (Owner, Purpose, Public surface, Invariants, Key choices, Non-goals, Depends on / Depended on by, Deferred) against the last committed version.
 
 Classify any changes:
 
-- **Hard flag** — signature change; invariant change; Non-goal *removed*; dependency added/removed. Require one of: capture as decision, revert, or explicit note added to STATUS.md Flags.
-- **Soft flag** — purely additive: trait/interface impl added; Public surface item added with new signature; Invariant *added* (not changed); Non-goal *added*. Offer: capture as decision / accept as idiomatic (keep MODULE.md edit, no DECISIONS entry) / revert.
+- **Hard flag** — signature change; invariant change; Non-goal *removed*; dependency added/removed; Deferred item *removed* (without evidence it was implemented). Require one of: capture as decision, revert, or explicit note added to STATUS.md Flags.
+- **Soft flag** — purely additive: trait/interface impl added; Public surface item added with new signature; Invariant *added* (not changed); Non-goal *added*; Deferred item *added*. Offer: capture as decision / accept as idiomatic (keep MODULE.md edit, no DECISIONS entry) / revert.
 
 ### 5. Detect structural changes
 
@@ -84,27 +84,55 @@ For each finding:
 
 Skip this step entirely if the Contributors table has no file-based loops (all contributions come through git, web UI, or issue tracker).
 
-### 7. Produce summary
+### 7. Drift-check nudge (soft, non-blocking)
+
+Read the `Last drift-check:` marker from STATUS.md (if present) and compute the session's touched layers:
+
+- Edited `docs/compact/requirements.md` → requirements layer touched.
+- Edited curated sections of any `MODULE.md`, or appended an entry to DECISIONS.md during architecture phase → design layer touched.
+- Edited code under `src/` → implementation layer touched.
+
+Nudge **if either** trigger fires:
+
+- Multiple layers were touched this session, **or**
+- The last drift-check is more than ~10 sessions old (or never).
+
+Suggest a mode based on which layers were touched:
+
+- Requirements + design → `/drift-check design`.
+- Design + implementation → `/drift-check dev-full` (or `dev-module <name>` if only one module was touched).
+- All three → `/drift-check all`.
+- Requirements only → `/drift-check requirements`.
+- Design only → `/drift-check design`.
+- Implementation only → `/drift-check dev-full` (or `dev-module <name>` if only one module was touched).
+- No layer touched (stale-only trigger) → `/drift-check all`.
+
+Surface as a one-line nudge:
+
+> "Drift-check nudge: <reason>. Consider `/drift-check <mode>` before committing. (Non-blocking — `skip` to continue.)"
+
+**Do not auto-invoke drift-check.** If the user chooses to run it, pause close-session; on return, re-enter at step 8. If they skip, continue. If the suggestion is declined repeatedly across sessions, do not escalate — the nudge stays soft.
+
+### 8. Produce summary
 
 - Files changed in `docs/compact/` and `src/**/MODULE.md`.
 - Unresolved items → write to STATUS.md **Flags** section for next session.
 - Draft commit message: short imperative; reference any new `D-XXX` IDs.
 
-### 8. Scaffold consistency audit (conditional)
+### 9. Scaffold consistency audit
 
-If any file under `.claude/skills/` (or the source-repo equivalent, e.g. `skills/compact/`) changed this session, invoke the `doctor` skill.
+Invoke the `doctor` skill unconditionally. Runs every close-session regardless of whether scaffold files changed this session — stale cross-references and generative-quorum gaps can accumulate even in sessions that don't touch the scaffold, and `doctor` is cheap and read-only.
 
 - Surface its full output verbatim.
-- On failures: user must address (fix now) or defer (note in STATUS.md Flags) before commit. `doctor` is read-only — it never auto-fixes.
-- Skip this step entirely if no scaffold files changed.
+- On failures: user must address (fix now) or defer (note in STATUS.md Flags) before commit. `doctor` never auto-fixes.
 
-### 9. Commit decision
+### 10. Commit decision
 
 Show the full diff once more. Ask: `commit` / `stage only` / `abort`.
 
 - `commit` → commit with the drafted message.
 - `stage only` → `git add` the changes; leave commit to the user.
-- `abort` → do nothing further. Writes from steps 2, 3, 4, 6 are **not** reverted — they were approved individually.
+- `abort` → do nothing further. Prior approved writes (STATUS, DECISIONS appends, MODULE.md audit outcomes, contribution-path routing, drift-check edits if the nudge was accepted) are **not** reverted — they were approved individually.
 
 **Never auto-commit. Never skip diff review.**
 

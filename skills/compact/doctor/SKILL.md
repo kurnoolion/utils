@@ -1,6 +1,6 @@
 ---
 name: doctor
-description: Audit the COMPACT scaffold for internal consistency. Runs deterministic checks on schema authorities, stale references, skill inventory, step monotonicity, tool-neutral framing, path canonicalization, and cross-file reference resolution. Read-only; never auto-fixes. Invoke when maintaining the scaffold, or automatically via close-session when scaffold files changed this session.
+description: Audit the COMPACT scaffold for internal consistency. Runs deterministic checks on schema authorities (generative from README), stale references, skill inventory, step monotonicity + step-reference resolution, tool-neutral framing, path canonicalization, and cross-file reference resolution. Read-only; never auto-fixes. Invoked unconditionally by close-session every session; also runnable manually when maintaining the scaffold.
 ---
 
 **Read-only.** Checks, reports, exits. Fixes are the user's job.
@@ -27,24 +27,24 @@ Grep scaffold root for `TRAINING.md`, `docs/ai/`, `RISKS.md`.
 
 ### 2. MODULE.md schema quorum
 
-Canonical curated-section list (in schema order): `Owner` (optional), `Purpose`, `Public surface`, `Invariants`, `Key choices`, `Non-goals`, `Depends on`, `Depended on by`.
+**Generative.** `README.md`'s MODULE.md schema example block is the canonical source. Extract the bold section names (lines matching `**<Name>**` inside that code block) at runtime — that's the authoritative list every other authority must agree on. Track which extracted names are marked optional in README (via an inline HTML comment containing the word "optional", or parenthetical "*(optional)*" markup).
 
-Verify every section name appears in all five authorities:
+Then verify every extracted section name appears in the other four authorities:
 
 - `project-init/base-prompts/00-swdev-project-customizer.md` — artifacts table row for `src/<module>/MODULE.md`.
-- `README.md` — MODULE.md schema example block.
 - `project-init/templates/structure-conventions.md` — "Module doc schema" section.
 - `close-session/SKILL.md` — Step 4 "Diff curated sections" parenthetical list.
 - `regen-map/SKILL.md` — "Never write" list.
 
-- **Pass:** every authority names every section. Owner may be marked optional; others must not be.
+- **Pass:** every extracted section name is named in each authority. Names flagged optional in README may be marked optional elsewhere; others must be named unconditionally.
 - **Fail:** list `(file, missing sections)` per authority.
+- **Fail (README parse):** if README's schema example block is missing, has no bold section names, or the fence boundaries can't be located, report it — doctor can't validate downstream authorities without a canonical source.
 
 ### 3. Interview topic-label agreement
 
 Compare the primary label (first 2-3 words) of each of the 7 topics in:
 
-- `project-init/SKILL.md` — Step 2 interview list.
+- `project-init/SKILL.md` — Step 4 interview list.
 - `project-init/base-prompts/00-swdev-project-customizer.md` — "Interview me about" list.
 
 - **Pass:** matching primary label for all 7 topics.
@@ -64,7 +64,7 @@ Count directories with a `SKILL.md` under scaffold root. Cross-reference claims 
 
 ### 5. Step monotonicity in multi-step skills
 
-For each skill whose procedure uses `### N. <title>` numbering (`close-session`, `regen-map`, `project-init`, `session-start`), extract heading numbers.
+For each skill whose procedure uses `### N. <title>` numbering (`close-session`, `regen-map`, `project-init`, `session-start`, `drift-check`), extract heading numbers.
 
 - **Pass:** monotonic sequence 1, 2, 3, ..., K with no gaps or duplicates.
 - **Fail:** show the gap, duplicate, or non-monotonic section per skill.
@@ -113,7 +113,21 @@ Extract the set of skill names from three sources:
 - **Pass:** identical set across all three.
 - **Fail:** show set differences per source.
 
-### 11. Retrofit snapshot scope
+### 11. Step-reference resolution
+
+Back-references of the form `Step N` / `step N` that cite a step in a *different* file (self-references are covered by Check 5's monotonicity pass). Typical sites: Check 2's authority list (`close-session/SKILL.md — Step 4 ...`); Check 3's authority list (`project-init/SKILL.md — Step 4 interview list`); narrative cross-refs in any SKILL.md.
+
+For each match where a citing line names a target file and a specific step number:
+
+- Resolve `<target-file>` to its path under scaffold root.
+- Verify a `### N.` heading exists in that file.
+
+- **Pass:** every cited step resolves to an existing numbered section.
+- **Fail:** list `(citing-file:line, target-file, requested-step-N, available-steps)` per mismatch.
+
+Ignore matches inside HTML comments and inside fenced example blocks — those aren't authority claims. Also ignore the literal strings in doctor's own check-numbering narrative (this file's own `### N.` headings are the monotonicity subject of Check 5).
+
+### 12. Retrofit snapshot scope
 
 `docs/compact/retrofit-snapshot.md` is produced once by `project-init --retrofit` and is archival — no scaffold skill should take an ongoing dependency on it at runtime. Grep scaffold root for `retrofit-snapshot.md`.
 
@@ -132,10 +146,10 @@ Root: <resolved path>
     Topic 3 label mismatch:
       project-init/SKILL.md:40            → "Stakeholder map & contribution surfaces"
       00-swdev-project-customizer.md:17   → "Team & contribution structure"  (stale)
-✓ 4. Skill inventory parity — 7 skills, 6 sub-skills, all claims consistent
+✓ 4. Skill inventory parity — 8 skills, 7 sub-skills, all claims consistent
 ...
 
-Summary: 9 passed, 1 failed. Review failures above.
+Summary: 10 passed, 1 failed. Review failures above.
 ```
 
 Exit status conceptually: failures present → user must address (or defer via `STATUS.md` Flags) before committing scaffold changes.

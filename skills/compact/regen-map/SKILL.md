@@ -21,7 +21,7 @@ Scope: whole repo by default. Optional arg: comma-separated module names to rege
 
 ## Never write
 
-- Any other section of MODULE.md (Owner, Purpose, Public surface, Invariants, Key choices, Non-goals, Depends on / Depended on by).
+- Any other section of MODULE.md (Owner, Purpose, Public surface, Invariants, Key choices, Non-goals, Depends on / Depended on by, Deferred).
 - `DECISIONS.md`, `PROJECT.md`, `STATUS.md`.
 - Any code.
 

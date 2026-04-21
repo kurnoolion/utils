@@ -5,7 +5,7 @@ description: Initialize a new project's AI scaffolding. Optional preflight impor
 
 ## Preconditions
 
-The following must exist under this skill's directory (`.claude/skills/project-init/`):
+The following must exist alongside this SKILL.md (typically `.claude/skills/project-init/` when installed in a project, or `skills/compact/project-init/` in the scaffold source repo):
 
 - `base-prompts/00-swdev-project-customizer.md` — the meta-prompt
 - `base-prompts/01-swdev-requirement-gathering.md`
@@ -13,7 +13,9 @@ The following must exist under this skill's directory (`.claude/skills/project-i
 - `base-prompts/03-swdev-development-testing-debugging.md`
 - `templates/` — skeletons for scaffolded state files
 
-If any base prompt is missing, abort: "Re-vendor base prompts from `github.com/kurnoolion/prompts-lib`."
+If any base prompt is missing, abort:
+
+> "Base prompt(s) missing: \<list of missing files\>. Recovery: run `/project-init --fetch-latest` to re-vendor from `github.com/kurnoolion/prompts-lib`, or manually copy the four files in `base-prompts/` from that repo into this skill's `base-prompts/` directory."
 
 ## Arguments
 
@@ -30,7 +32,9 @@ Check `docs/compact/phases/*.md`, `docs/compact/PROJECT.md`, `docs/compact/STATU
 
 - Fully present, no `--re-init` flag → abort with: "Project already initialized. Use `/project-init --re-init` to regenerate phase prompts without touching state."
 - `--re-init` → load `docs/compact/project-init-interview.md` (if exists) as defaults.
-- `--retrofit` and `docs/compact/` already populated → abort: "`--retrofit` is for first-time init. State files already exist."
+- `--retrofit` and `docs/compact/` already populated → abort:
+
+  > "`--retrofit` is for first-time init, but `docs/compact/` already exists. To regenerate phase prompts against current state without touching state files, use `/project-init --re-init`. To re-scan the codebase from scratch, first move or back up `docs/compact/` (preserving `DECISIONS.md`, `requirements.md`, and any other hand-edited content you want to keep), then re-run `/project-init --retrofit`."
 - Otherwise → fresh init (greenfield or retrofit).
 
 ### 2. Preflight: import existing design artifacts (optional)
@@ -141,7 +145,7 @@ Write customized prompts (~400-600 words each) to:
 Each phase prompt must follow the 5-section schema:
 
 ```
-**Posture**: 1-2 lines.
+**Persona**: 1-2 lines.
 **Load when entering**: files to prioritize.
 **Do**: bullets.
 **Don't**: bullets.
@@ -161,6 +165,7 @@ Copy from `templates/` and fill in project-specific bits:
 | `docs/compact/STATUS.md` | `Active phase: requirements`, dated today; Next pre-populated with "Fill in PROJECT.md during requirements phase" | `Active phase: architecture`, dated today; Next pre-populated with "Fill MODULE.md skeletons module-by-module (remove `<!-- retrofit: skeleton -->` sentinel when each is curated)" |
 | `docs/compact/DECISIONS.md` | Empty header + comment template | Same (reconstructed entries added in step 9 if user opts in) |
 | `docs/compact/MAP.md` | Placeholder pointing at `regen-map` | Placeholder (regenerated in step 10) |
+| `docs/compact/requirements.md` | Skeleton with FR / NFR / Deferred sections; user populates during requirements phase | Seeded from `design-inputs/` requirements-shaped files if any are present (candidate FR / NFR lines as comments under each section, never as authoritative entries). **Preserve existing IDs verbatim** if the inputs use them (e.g. `REQ-042` stays `REQ-042`); only new additions use `FR-N` / `NFR-N`. Empty skeleton otherwise. |
 | `docs/compact/structure-conventions.md` | Derived from tech-stack answer (topic 2); for common stacks (Rust, Go, Python, TypeScript) produce a first draft; for polyglot or unusual stacks, scaffold with explicit prompts | **Polyglot-aware**: one section per confirmed language (step 3a), each with its own Module definition + Visibility mapping. If only one language, single-section format. |
 
 ### 8. Seed MODULE.md skeletons (retrofit only)
@@ -243,13 +248,18 @@ Surface regen-map's full output, including any drift reports or orphan flags.
 - **MODULE.md skeletons seeded**: `<count>` (retrofit only). Remove `<!-- retrofit: skeleton -->` sentinel from each once curated.
 - **Reconstructed decisions**: `<count>` (retrofit only, if user opted in).
 - **Review `docs/compact/structure-conventions.md`** — derived from your tech-stack answer; confirm or edit before the next `regen-map` run.
+- **`docs/compact/requirements.md`** scaffolded — populate during the requirements phase (or curate retrofit-seeded candidates in place). `drift-check` uses this as the authority for what the system is supposed to do.
 - Next step:
   - Greenfield: `/switch-phase requirements`
   - Retrofit: `/switch-phase architecture` (already set); begin curating MODULE.md skeletons.
+- **Retrofit follow-ups (if applicable):**
+  - If `design-inputs/` contains requirements documentation (PRDs, spec lists), `/switch-phase requirements` briefly to extract FR / NFR into `docs/compact/requirements.md` before or alongside architecture work. Retrofit does **not** auto-populate requirements.md from code — specs must be captured explicitly.
+  - Once enough MODULE.md skeletons are curated to have real Public surface entries, run `/drift-check design`. It surfaces code capabilities that lack an owning FR / NFR in `requirements.md` — the gap a retrofit scan can't detect. Resolve each drift by adding the FR/NFR, marking it Deferred, or reverting the MODULE.md claim.
 
 ## Rules
 
-- **Never overwrite** STATUS.md, PROJECT.md, DECISIONS.md, MAP.md, any file under `docs/compact/design-inputs/`, or `docs/compact/retrofit-snapshot.md` on `--re-init`.
+- **Never overwrite** STATUS.md, PROJECT.md, DECISIONS.md, MAP.md, `docs/compact/requirements.md`, `docs/compact/structure-conventions.md`, any file under `docs/compact/design-inputs/`, or `docs/compact/retrofit-snapshot.md` on `--re-init`.
+- **On `--re-init`, `structure-conventions.md` is preserved even if the topic 2 answer changed.** If the user's tech stack, module convention, or visibility mapping has materially shifted since last init, prompt them to edit `docs/compact/structure-conventions.md` by hand before the next `regen-map` run — `--re-init` regenerates phase prompts but not this file, because it may carry hand-edits the re-init can't safely reconcile.
 - **Never overwrite an existing MODULE.md** during retrofit skeleton seeding.
 - Never run the interview without explicit user confirmation.
 - Never fetch base prompts from the network without `--fetch-latest`.

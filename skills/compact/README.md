@@ -8,12 +8,13 @@ The name captures the core idea: memory-as-contract (a *compact* between human a
 
 ## What this is
 
-A set of 7 skills plus templates that, together, give a team:
+A set of 8 skills plus templates that, together, give a team:
 
 - **A shared ritual** — session-start to hydrate context, close-session to persist progress and decisions.
 - **Phase discipline** — explicit Requirements / Architecture / Development lenses you switch between deliberately.
 - **An auditable code map** — `MODULE.md` files co-located with code, plus a regenerated `MAP.md` so AI-generated code isn't a black box.
 - **A decision log** — ADR-style `DECISIONS.md` where non-obvious choices are anchored; linked from `MODULE.md` for grounded "why" queries.
+- **Drift detection across layers** — `drift-check` surfaces mismatches between requirements, design, and implementation. Interactive resolution; no auto-fix.
 
 Designed to work identically across Claude Code (Anthropic) and Cline (any model, including team-internal LLMs). Both tools read `.claude/skills/` and share the `SKILL.md` format.
 
@@ -51,25 +52,29 @@ Start a new Claude Code or Cline session. `session-start` will detect the uninit
 | `close-session` | Recap work; two-pass decision triage; diff-based STATUS update; MODULE.md soft/hard-flag audit; conditional `regen-map`; propose commit. Never auto-writes. |
 | `regen-map` | Regenerate `MODULE.md` Structure sections + rebuild `MAP.md` from code. Phase-aware orphan detection. Self-checking (reverts any curated-section edit). |
 | `project-init` | Run the 7-topic interview, customize 3 phase prompts from base prompts, scaffold `docs/compact/`. `--re-init` regenerates phase prompts without touching state files. `--retrofit` adds a codebase-scan preflight for existing projects: detects languages, seeds MODULE.md skeletons, writes a polyglot-aware `structure-conventions.md`, and produces an initial `MAP.md`. |
-| `doctor` | Audit scaffold internal consistency: schema authorities, stale refs, skill inventory, step monotonicity, tool-neutral framing, path canonicalization, cross-file references. Read-only. Auto-invoked by `close-session` when scaffold files changed. |
+| `drift-check` | Detect and resolve drift across the R/D/I layers: requirements (`requirements.md`) vs design (`MODULE.md` + architecture ADRs) vs implementation (code). Four modes (`requirements` / `design` / `dev-full` / `dev-module`) plus `all`. Interactive — user decides direction per drift. Never auto-fixes, never auto-cascades. Deferred items surfaced separately, not flagged. |
+| `doctor` | Audit scaffold internal consistency: schema authorities (generative from README), stale refs, skill inventory, step monotonicity + step-reference resolution, tool-neutral framing, path canonicalization, cross-file references. Read-only. Auto-invoked by `close-session` every session. |
 
 ## Artifacts produced by `project-init`
 
 ```
 docs/compact/
-  PROJECT.md                    # 1-page what we're building (human-curated)
-  STATUS.md                     # Active phase + Done / In progress / Next / Flags
+  PROJECT.md                    # 1-page identity: who / why / scope boundaries (human-curated)
+  requirements.md               # Behavioral specs: FR / NFR / Deferred (human-curated)
+  STATUS.md                     # Active phase + Done / In progress / Next / Flags + drift-check marker
   DECISIONS.md                  # Append-only ADR log (immutable entries)
   MAP.md                        # Regen-generated module map + Mermaid
   structure-conventions.md      # Per-repo: what's a module, visibility mapping
   project-init-interview.md     # Persisted 7-topic answers (source for --re-init)
   phases/
-    requirements.md             # Customized from base prompts
-    architecture.md             # Customized from base prompts
-    development.md              # Customized from base prompts
+    requirements.md             # Phase prompt (customized from base prompts) — NOT the same as docs/compact/requirements.md
+    architecture.md             # Phase prompt (customized from base prompts)
+    development.md              # Phase prompt (customized from base prompts)
 
 src/<module>/MODULE.md          # Co-located module docs (doc-first at architecture)
 ```
+
+**Note:** `docs/compact/requirements.md` (behavioral specs) and `docs/compact/phases/requirements.md` (the requirements-phase AI persona) are two different files. The specs are the *what*; the phase prompt is *how the AI behaves when working on requirements*. Keep them distinct when reading or referencing.
 
 ## The `MODULE.md` schema
 
@@ -102,6 +107,8 @@ Each module has a `MODULE.md` co-located with its code. Curated sections are han
 
 **Depends on**: [mod-a](../mod-a/MODULE.md)
 **Depended on by**: [mod-b](../mod-b/MODULE.md)
+
+**Deferred** <!-- optional; planned-but-unbuilt behaviors for this module. Written by drift-check or hand-added. -->
 ```
 
 ## Design principles
@@ -168,6 +175,28 @@ Retrofit then:
 - Runs `regen-map` once to produce an initial `MAP.md`.
 
 Post-retrofit, the standard workflow applies: curate MODULE.md skeletons module-by-module, remove each sentinel when done, and `/close-session` at the end of every session.
+
+## Drift detection across R/D/I layers
+
+COMPACT keeps three layers in play — **requirements** (`docs/compact/requirements.md`, FR/NFR specs), **design** (`MODULE.md` curated sections + ADRs in `DECISIONS.md`), and **implementation** (code). As work progresses, these layers drift apart: a session introduces a behavior that's not in any FR; a MODULE.md invariant contradicts a newly-added NFR; a module's code silently outgrows its declared Public surface.
+
+`/drift-check` detects and helps resolve that drift. Four modes plus a guided cascade:
+
+| Mode | What it compares |
+|---|---|
+| `/drift-check requirements` | Session discussion / recent commits vs `requirements.md` |
+| `/drift-check design` | `MODULE.md` curated sections + architecture ADRs vs `requirements.md` |
+| `/drift-check dev-full` | All modules' code vs their `MODULE.md` |
+| `/drift-check dev-module <name>` | One module's code vs its `MODULE.md` |
+| `/drift-check all` | `requirements` → `design` → `dev-full`, with user approval at each descent |
+
+Every drift is presented with the evidence from both layers (`file:line` on each side). The user picks the direction: update layer A, update layer B, specify both, skip, or mark the item as deferred. The skill never auto-decides, never auto-cascades, and writes nothing until the user approves the combined diff.
+
+**Deferred is not drift.** Each artifact carries its own `## Deferred` section — `requirements.md` for deferred specs, `MODULE.md` for deferred design elements, inline `TODO(deferred: <reason>)` for deferred implementation bits. Drift-check reads all three and classifies matching items as `[DEFERRED]` with a one-line note, not as findings that need action.
+
+**IDs are stable.** `FR-N` and `NFR-N` are never renumbered; removed requirements are struck through in place (`~~**FR-3** — ...~~`) so the history stays traceable. Retrofit projects preserve their pre-existing IDs verbatim (a `REQ-042` stays `REQ-042` — only new additions use the COMPACT default).
+
+`/close-session` emits a non-blocking **drift-check nudge** when a session has touched multiple layers (requirements + design, design + code, or all three), or when drift-check hasn't run in a while. It's a one-line suggestion, not a gate — `skip` to commit without running.
 
 ## Long sessions and auto-compaction
 

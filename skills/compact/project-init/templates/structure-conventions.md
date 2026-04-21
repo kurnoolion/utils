@@ -65,6 +65,7 @@ Each module has `src/<module>/MODULE.md` (or per-language canonical path) with t
 - **Non-goals** — deliberate omissions.
 - **Structure** — regen-only; bounded by `<!-- BEGIN:STRUCTURE -->` / `<!-- END:STRUCTURE -->`; never hand-edited.
 - **Depends on** / **Depended on by** — links to other MODULE.md.
+- **Deferred** *(optional)* — planned-but-unbuilt behaviors for this module. Populated by hand or by `drift-check`; read by `drift-check` to classify matching items as `[DEFERRED]` instead of drift.
 
 ## Retrofit skeleton sentinel
 

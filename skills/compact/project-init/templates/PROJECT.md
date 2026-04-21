@@ -1,5 +1,7 @@
 # Project: <name>
 
+*Identity: who / why / scope boundaries. Behavioral specs (FR / NFR) live in `requirements.md`.*
+
 **One-line**: Single-sentence elevator pitch.
 
 **Problem**: 1-2 paragraphs. What pain is this solving, for whom?
