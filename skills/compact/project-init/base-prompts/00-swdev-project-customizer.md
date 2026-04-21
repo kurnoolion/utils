@@ -113,6 +113,26 @@ Projects often start with design artifacts drafted elsewhere (Claude web, ChatGP
 
 ---
 
+## Retrofit inputs (optional)
+
+When `project-init --retrofit` runs against an existing codebase, it produces `docs/compact/retrofit-snapshot.md` — an archival record of detected languages, candidate modules, and observed public-surface signatures. It also seeds `src/<module>/MODULE.md` skeletons with a `<!-- retrofit: skeleton -->` sentinel at the top of each.
+
+**If `docs/compact/retrofit-snapshot.md` exists** when you're generating phase prompts, wire it in:
+
+- **requirements.md — Load when entering:** add `docs/compact/retrofit-snapshot.md`.
+- **requirements.md — Do:** add a bullet: "This project was retrofitted from an existing codebase. Treat `retrofit-snapshot.md` as the inventory of what the scan observed. Cross-reference it with `design-inputs/` (if present) when extracting PROJECT.md fields — disagreements between design intent and code reality are Open questions."
+
+- **architecture.md — Load when entering:** add `docs/compact/retrofit-snapshot.md` and note that `src/**/MODULE.md` files with `<!-- retrofit: skeleton -->` at the top are unfinished contracts.
+- **architecture.md — Do:** add two bullets:
+  - "Curate retrofit MODULE.md skeletons module-by-module. Each starts with `<!-- retrofit: skeleton -->` and TODO placeholders. Fill the curated sections (Purpose, Public surface, Invariants, Key choices, Non-goals, Depends on, Depended on by); the commented candidate list under Public surface is a scratch pad — choose what belongs in the contract, don't copy verbatim. Remove the sentinel once the MODULE.md is fully curated; from that point, `close-session`'s hard-flag audit applies normally."
+  - "`retrofit-snapshot.md` is archival — do not update it. If the scan missed a module or mis-attributed a language, fix the MODULE.md directly and note the correction in STATUS.md Flags."
+
+- **development.md:** no explicit wiring. Retrofit-era artifacts are archival by the time development starts; `MODULE.md` contracts are canonical.
+
+**If `docs/compact/retrofit-snapshot.md` does not exist (greenfield or design-only)**, omit these lines entirely.
+
+---
+
 ## What to generate
 
 Three customized phase prompts (~400-600 words each), written to:

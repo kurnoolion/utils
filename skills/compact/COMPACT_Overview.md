@@ -429,7 +429,7 @@ CLAUDE.md                  ← one-liner to auto-trigger session-start
 | Skill | What it does | When to invoke |
 |---|---|---|
 | `compact` | Orientation only — prints this methodology overview and points to the sub-skills | When onboarding or for a refresher |
-| `project-init` | 7-topic interview; produces phase prompts + scaffolding | Once, at project creation |
+| `project-init` | 7-topic interview; produces phase prompts + scaffolding. `--retrofit` for existing codebases (seeds MODULE.md skeletons + initial MAP.md) | Once, at project creation |
 | `session-start` | Hydrate context; ask what you're working on | Start of every conversation |
 | `switch-phase` | Adopt requirements/architecture/development posture | When switching phases |
 | `close-session` | Persist work: decisions, status, audit | End of every session |
@@ -499,13 +499,37 @@ CLAUDE.md                  ← one-liner to auto-trigger session-start
 
 **Goal:** turn a fresh repo into a working project in one guided interview.
 
-1. Runs the 7-topic interview (from vendored meta-prompt).
-2. Persists answers to `docs/compact/project-init-interview.md`.
-3. Customizes the 3 phase prompts (fuses your answers with base templates).
-4. Scaffolds `PROJECT.md`, `STATUS.md`, `DECISIONS.md`, `MAP.md`, `structure-conventions.md`.
-5. Tells you: "Next step: `/switch-phase requirements`".
+1. Optional preflight: import existing design docs into `docs/compact/design-inputs/`.
+2. Runs the 7-topic interview (from vendored meta-prompt).
+3. Persists answers to `docs/compact/project-init-interview.md`.
+4. Customizes the 3 phase prompts (fuses your answers with base templates).
+5. Scaffolds `PROJECT.md`, `STATUS.md`, `DECISIONS.md`, `MAP.md`, `structure-conventions.md`.
+6. Tells you: "Next step: `/switch-phase requirements`".
 
 **Re-init:** `--re-init` regenerates phase prompts only. Never overwrites state files.
+
+**Retrofit:** `--retrofit` for projects that already have code. See the next slide.
+
+---
+
+## project-init --retrofit
+
+**Goal:** bring COMPACT to a project that already has requirements, design, and/or code.
+
+**Extra preflight:**
+- Detects languages from manifest files (Cargo.toml, go.mod, pyproject.toml, package.json). You confirm or add any missed.
+- Discovers candidate modules per-language (Rust `src/<mod>/`, Go `pkg/` · `cmd/` · `internal/`, Python `__init__.py` dirs, TypeScript `src/` or `packages/*/src/`).
+- Extracts public-surface candidates (top-level `pub` / `export` / capitalized / non-underscore) per module.
+- Writes `docs/compact/retrofit-snapshot.md` — archival; read once, then never updated.
+
+**Extra scaffolding:**
+- Seeds `src/<module>/MODULE.md` at each detected path with a `<!-- retrofit: skeleton -->` sentinel + TODO placeholders + commented candidate-signature list under Public surface.
+- Writes a **polyglot-aware** `structure-conventions.md` — one section per confirmed language. `regen-map` iterates per language.
+- Sets `STATUS.md` active phase to `architecture` (not `requirements`). The gap is the contract, not the spec.
+- Optionally anchors observed choices (runtime, storage, framework) as `DECISIONS.md` entries with `status: reconstructed`. User opts in per item; rationale is never invented.
+- Runs `regen-map` once to produce the initial `MAP.md`.
+
+**Post-retrofit:** curate MODULE.md skeletons module-by-module; remove the sentinel from each when curated; `/close-session` at the end of every session. `close-session`'s hard-flag audit gives sentinel-marked files a grace — normal audit applies the moment the sentinel is removed.
 
 ---
 
@@ -1072,7 +1096,7 @@ A: Decisions are immutable. Add a new one marking the old as `Superseded by`. Hi
 A: Run `/project-init --re-init`. Answers preserved as defaults; edit and regenerate.
 
 **Q: Can I use this on an existing project?**
-A: Not yet — retrofit (against already-written code) is a later phase. Greenfield first.
+A: Yes — run `/project-init --retrofit`. It scans the codebase (languages, candidate modules, public-surface candidates per module), writes an archival `docs/compact/retrofit-snapshot.md`, seeds `MODULE.md` skeletons (each with a `<!-- retrofit: skeleton -->` sentinel), produces a polyglot-aware `structure-conventions.md`, optionally anchors observed choices as `reconstructed` DECISIONS entries, and runs `regen-map` once. Active phase lands at `architecture` — the team curates MODULE.md skeletons module-by-module and removes the sentinel as each becomes a real contract.
 
 **Q: I already drafted a design doc in Claude web / ChatGPT / a doc tool. Can I bring it in?**
 A: Yes — `/project-init` has a preflight that imports design artifacts into `docs/compact/design-inputs/`. The generated requirements + architecture phase prompts automatically reference them as starting proposals. You still go through all three phases, but the AI drafts PROJECT.md fields and candidate module boundaries from your inputs instead of starting blank. Reply `skip` at the preflight if greenfield.

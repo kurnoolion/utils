@@ -55,7 +55,9 @@ Assign the next sequential `D-XXX` ID. Show the drafted entry. On approval, appe
 
 For each `src/<module>/MODULE.md` touched this session:
 
-Diff curated sections (Owner, Purpose, Public surface, Invariants, Key choices, Non-goals, Depends on / Depended on by) against the last committed version.
+**Retrofit skeleton grace.** If the file begins with `<!-- retrofit: skeleton -->`, it's a `project-init --retrofit`-seeded skeleton in the process of being curated. Curated-section edits are expected, not flag-worthy. Surface a one-line note ("curating retrofit skeleton: <module>") and skip the hard/soft classification. If the session's edits fully populate the curated sections (no TODO placeholders remain), prompt: "This MODULE.md looks curated. Remove the `<!-- retrofit: skeleton -->` sentinel so future audits apply normal rules?"
+
+For all other MODULE.md files, diff curated sections (Owner, Purpose, Public surface, Invariants, Key choices, Non-goals, Depends on / Depended on by) against the last committed version.
 
 Classify any changes:
 

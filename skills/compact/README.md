@@ -50,7 +50,7 @@ Start a new Claude Code or Cline session. `session-start` will detect the uninit
 | `switch-phase` | Switch between `requirements`, `architecture`, `development` lenses. Loads phase file; updates active phase in STATUS.md. |
 | `close-session` | Recap work; two-pass decision triage; diff-based STATUS update; MODULE.md soft/hard-flag audit; conditional `regen-map`; propose commit. Never auto-writes. |
 | `regen-map` | Regenerate `MODULE.md` Structure sections + rebuild `MAP.md` from code. Phase-aware orphan detection. Self-checking (reverts any curated-section edit). |
-| `project-init` | Run the 7-topic interview, customize 3 phase prompts from base prompts, scaffold `docs/compact/`. `--re-init` regenerates phase prompts without touching state files. |
+| `project-init` | Run the 7-topic interview, customize 3 phase prompts from base prompts, scaffold `docs/compact/`. `--re-init` regenerates phase prompts without touching state files. `--retrofit` adds a codebase-scan preflight for existing projects: detects languages, seeds MODULE.md skeletons, writes a polyglot-aware `structure-conventions.md`, and produces an initial `MAP.md`. |
 | `doctor` | Audit scaffold internal consistency: schema authorities, stale refs, skill inventory, step monotonicity, tool-neutral framing, path canonicalization, cross-file references. Read-only. Auto-invoked by `close-session` when scaffold files changed. |
 
 ## Artifacts produced by `project-init`
@@ -149,6 +149,25 @@ Slash-command syntax below is Claude Code. In Cline, invoke the same skills by n
 8. Subsequent sessions: `/switch-phase development`; implement against the contracts in `MODULE.md`; `/close-session` audits.
 
 **Bringing in existing design work:** if you drafted a design doc in Claude web, ChatGPT, or another tool before starting, `/project-init` asks for it upfront. Paste it or give a file path; it lands in `docs/compact/design-inputs/` and the generated requirements + architecture phase prompts automatically reference it as a starting proposal to refine. Greenfield projects just reply `skip`.
+
+## Retrofitting an existing project
+
+If the project already has requirements, design docs, and/or code, run `/project-init --retrofit` instead of vanilla init. The preflight adds a codebase scan on top of the design-inputs import:
+
+- **Language detection** — scans for manifest files (`Cargo.toml`, `go.mod`, `pyproject.toml`, `package.json`, …) and surfaces the list for your confirmation. You can add any missed.
+- **Module discovery** — applies per-language conventions (Rust `src/<mod>/`, Go `pkg/` / `cmd/` / `internal/`, Python `__init__.py` dirs, TypeScript `src/` or `packages/*/src/`) to collect candidate modules.
+- **Public-surface extraction** — greps each candidate module for top-level public items. Results become commented-out *candidates* in the seeded `MODULE.md` — a reviewable list, not a curated contract.
+- **Archival snapshot** — everything written to `docs/compact/retrofit-snapshot.md`, read once by the interview and by the customizer's phase-prompt generation; nothing after.
+
+Retrofit then:
+
+- Seeds `src/<module>/MODULE.md` skeletons at each detected path, each prefixed with `<!-- retrofit: skeleton -->`. While this sentinel is present, `close-session`'s hard-flag audit treats curated-section edits as expected. Remove the sentinel once the MODULE.md is fully curated.
+- Writes a **polyglot-aware** `structure-conventions.md` — one section per confirmed language, each with its own Module definition and Visibility mapping. `regen-map` iterates per language.
+- Sets active phase to `architecture` (not `requirements`). The team's next work is curating contracts, not discovering requirements.
+- Offers opt-in **reconstructed decisions** — observed choices (runtime, storage, framework) can be anchored as `DECISIONS.md` entries with `status: reconstructed` and today's date. Rationale is explicitly *not* backfilled; only the choice is recorded, plus a `TODO` for Consequences.
+- Runs `regen-map` once to produce an initial `MAP.md`.
+
+Post-retrofit, the standard workflow applies: curate MODULE.md skeletons module-by-module, remove each sentinel when done, and `/close-session` at the end of every session.
 
 ## Long sessions and auto-compaction
 

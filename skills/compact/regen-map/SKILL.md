@@ -9,9 +9,9 @@ Scope: whole repo by default. Optional arg: comma-separated module names to rege
 
 ## Read-only inputs
 
-- `docs/compact/structure-conventions.md` — **required**. Defines what a "module" is in this repo and how language-native visibility maps to `pub` / `internal`. Abort if missing.
+- `docs/compact/structure-conventions.md` — **required**. Defines what a "module" is in this repo and how language-native visibility maps to `pub` / `internal`. For polyglot repos, one section per language. Abort if missing.
 - `docs/compact/STATUS.md` — read `Active phase` for DRAFT vs ORPHANED semantics.
-- All `src/**/MODULE.md` files.
+- All `MODULE.md` files (per the per-language canonical paths in structure-conventions).
 - The codebase.
 
 ## Writeable surface — only these
@@ -29,16 +29,22 @@ Scope: whole repo by default. Optional arg: comma-separated module names to rege
 
 ### 1. Preflight
 
-Load `structure-conventions.md`. Apply its module-definition rule and visibility mapping. If missing, abort: "Run `/project-init` or create `docs/compact/structure-conventions.md` before running regen-map."
+Load `structure-conventions.md`. If missing, abort: "Run `/project-init` or create `docs/compact/structure-conventions.md` before running regen-map."
+
+**Detect polyglot format.** If the file contains `## <language>` sections (e.g. `## Rust`, `## TypeScript`) each with `### Module definition` and `### Visibility mapping` subsections, treat as polyglot: iterate per language in step 2, applying that language's rules to its canonical module paths. Otherwise treat as single-language: apply the flat `## Module definition` and `## Visibility mapping` rules to all modules.
+
+Also read any `## Cross-language edges` section verbatim for use in step 4.
 
 Read `STATUS.md` to determine the active phase.
 
 ### 2. For each module M with a MODULE.md
 
+Resolve M's language from its path (polyglot) or apply the single flat ruleset. Then:
+
 a. Check whether M has corresponding code.
 
 b. **If M has code:**
-   - Scan code. Extract classes / structs / methods with visibility (pub / internal per conventions). **Include trait / interface implementations** (e.g., `impl Clone for Store`, `impl Iterator for X`).
+   - Scan code. Extract classes / structs / methods with visibility (pub / internal per that language's mapping). **Include trait / interface implementations** (e.g., `impl Clone for Store`, `impl Iterator for X`).
    - Render Structure deterministically:
      - Alphabetical by container; then alphabetical by member.
      - Each line: `name` — kind — visibility — 1-line purpose.
@@ -51,17 +57,22 @@ c. **If M has MODULE.md but no code:**
 
 ### 3. Detect new modules
 
-Code exists, no MODULE.md → record for summary. **Do NOT create MODULE.md.**
+Code exists, no MODULE.md → record for summary. **Do NOT create MODULE.md.** In polyglot repos, apply each language's module-definition rule to its own scope.
 
 ### 4. Regenerate MAP.md
 
 Write `docs/compact/MAP.md` with:
 
-- Module table: alphabetical. Each row:
+- **Single-language**: one module table, alphabetical.
+- **Polyglot**: one `## <language>` subheading per language, each with its own alphabetical module table. Modules never cross tables.
+
+Each table row:
   - Module name linked to its MODULE.md
   - Purpose (first sentence of MODULE.md's Purpose section)
   - Status marker: `[DRAFT]` / `[NEW]` / `[ORPHANED]` / none
-- Mermaid flowchart: nodes alphabetical, edges derived from each module's **Depends on** section.
+
+- Mermaid flowchart: nodes alphabetical, edges derived from each module's **Depends on** section. In polyglot mode, annotate nodes with language tags (e.g. `auth[auth · rust]`).
+- If structure-conventions had a `## Cross-language edges` section, copy it verbatim into MAP.md as a `## Cross-language edges` section below the flowchart.
 - Header note: "Generated YYYY-MM-DD by regen-map. Do not hand-edit."
 
 ### 5. Self-check

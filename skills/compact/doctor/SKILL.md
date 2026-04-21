@@ -113,6 +113,13 @@ Extract the set of skill names from three sources:
 - **Pass:** identical set across all three.
 - **Fail:** show set differences per source.
 
+### 11. Retrofit snapshot scope
+
+`docs/compact/retrofit-snapshot.md` is produced once by `project-init --retrofit` and is archival — no scaffold skill should take an ongoing dependency on it at runtime. Grep scaffold root for `retrofit-snapshot.md`.
+
+- **Pass:** all matches live inside one of: `project-init/SKILL.md` (the file it produces), `project-init/base-prompts/00-swdev-project-customizer.md` (wires phase prompts to read it), `README.md` / `COMPACT_Overview.md` (documentation), `doctor/SKILL.md` (this check).
+- **Fail:** list `(file:line)` for unexpected references — e.g. `session-start`, `close-session`, or `regen-map` naming retrofit-snapshot as a load target. The retrofit path has then bled into steady-state operation.
+
 ## Output format
 
 ```
