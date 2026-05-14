@@ -525,7 +525,7 @@
   <text x="96" y="2124" class="t-flowname">PARALLEL WORK — multiple strands in flight</text>
   <text x="96" y="2142" class="t-small">Each strand is its own folder of state. Sessions bind to a strand; close-session writes there. Architect lands drafts sequentially.</text>
 
-  <g transform="translate(40,2195)">
+  <g transform="translate(40,2155)">
     <rect x="56"  y="0" width="160" height="22" rx="4" fill="#fff" stroke="#d35400"/>
     <text x="136" y="15" class="t-flowmono" text-anchor="middle">/start-strand &lt;name&gt;</text>
     <path d="M216,11 L240,11" stroke="#333" stroke-width="1.4" marker-end="url(#arr)"/>
