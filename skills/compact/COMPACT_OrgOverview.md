@@ -136,7 +136,20 @@ Combining **Context + Prompt + Memory** gives you:
 **Parallel Work Primitives** — strands for multi-track work
 `/start-strand` · `/switch-strand` · `/list-strands` · `/land-strand` · `/adopt-strands`
 
-> One-page reference: `COMPACT_Cheatsheet.png` in the source repo.
+---
+
+# Cheatsheet — one-page reference
+
+![bg right:60% fit](COMPACT_Cheatsheet.png)
+
+Everything on one page:
+
+- 🅒 🅟 🅜 — engineering DNA
+- 12 skills · 3 groups
+- 6 use-case flows
+- Context tiers per phase
+
+> You'll get a copy.
 
 ---
 
@@ -210,22 +223,6 @@ Install the skills once into `.claude/skills/`. Both Claude Code and Cline pick 
 
 > Code review, VCS, CI/CD — each was once "the new thing."
 > **COMPACT is the protocol layer for AI-partnered teams.**
-
----
-
-# One-page reference — the cheatsheet
-
-![bg right:62% fit](COMPACT_Cheatsheet.png)
-
-The full scaffold at a glance:
-
-- 🅒 Context · 🅟 Prompt · 🅜 Memory — engineering DNA
-- 12 skills in 3 groups (Project / Session / Parallel Work)
-- Use-case flows — greenfield, retrofit, daily session, parallel work via strands, drift detection
-- Context tiers per phase
-
-> You'll get a copy alongside this deck.
-> Source: `skills/compact/COMPACT_Cheatsheet.png`
 
 ---
 
