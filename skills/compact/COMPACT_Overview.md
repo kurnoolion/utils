@@ -1041,7 +1041,7 @@ Cline doesn't have Claude Code's native `/slash-command` shortcut, so skills are
 | Action | Claude Code | Cline |
 |---|---|---|
 | Start session | Auto (via `CLAUDE.md`) | Auto (via `.clinerules`) |
-| Orientation / refresher | `/compact` | `run the compact skill` |
+| Orientation / refresher | `/compact-skill` | `run the compact-skill skill` |
 | Init project | `/project-init` | `run the project-init skill` |
 | Switch phase | `/switch-phase architecture` | `run the switch-phase skill with arg architecture` |
 | Close session | `/close-session` | `run the close-session skill` |
