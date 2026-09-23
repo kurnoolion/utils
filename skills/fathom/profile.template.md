@@ -14,6 +14,12 @@
 - Extra primary sources I trust: <e.g. our internal wiki export at ~/notes; a regulator's docket search>
 - Treat as discovery only: <e.g. vendor blogs, forum threads>
 
+## Internal sources
+- Local folders (Claude Code searches them; web-app users bundle them with scripts/corpus.py): <e.g. ~/mail-export, ~/docs/network-team, ~/intranet-saves>
+- Connectors to use on cloud platforms: <e.g. Google Drive, Gmail, SharePoint>
+- Internal names to search for: <project codenames, ticket prefixes, team names>
+- Classification rule: <e.g. any brief using internal material is marked INTERNAL and stays on the intranet>
+
 ## House style
 - Save briefs to: <path>; filename: <pattern, e.g. <topic>_brief.md>
 - Always include: <e.g. a one-page TLDR for Full depth; a "why it matters" column in every table>

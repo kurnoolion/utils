@@ -52,6 +52,7 @@ Default to the smallest depth that can answer. The user can force one with `quic
 Searches are cheap to run and expensive to read. Pick only the lanes that can change the answer, run one good query per lane in **expert vocabulary** (the words a 3GPP delegate, an FCC lawyer, a kernel maintainer or a sell-side analyst would use, not the user's phrasing), and read results as: claim · who · when · where it originated.
 
 Lanes:
+- **Internal** — the user's own material (emails, documents, intranet pages, tickets) when the user gives paths in the prompt, the profile lists a corpus or connectors, or the question concerns their organization. Runs first, because internal facts reshape which public questions matter. Paths in the prompt win over the profile: index them (`scripts/corpus.py index <paths>`), search with the expert terms, read only matching snippets. An attached file headed `Fathom corpus bundle` is this lane already done; use it. Procedure, tagging and confidentiality rules: `references/internal-sources.md`.
 - **Current state** — what is true now. The newest dated primary source wins.
 - **Primary / operative** — filings, specs and standards contributions, earnings transcripts, release notes, source code, official docs, regulator and court records.
 - **Counter-evidence** — *required at Targeted and Full.* Search for the strongest version of "this is wrong" (add terms like criticism, delayed, fails, walked back, not true). Report one of: found and incorporated · found but not probative (say why) · none located in the searches run.
@@ -120,7 +121,7 @@ House style: direct analytic voice, numbered sections, tables with "why it matte
 - Frame first; a wrong frame is the most expensive search.
 - One query per lane, expert vocabulary, budgets by depth.
 - Ledger lines, not notes; no drafts; no tables for uncontested points.
-- Load a reference file only when its trigger fires: forecast → `forecasting.md`; contested or high-stakes → `evidence.md`; Full → `brief-format.md`; one domain pack at most.
+- Load a reference file only when its trigger fires: forecast → `forecasting.md`; contested or high-stakes → `evidence.md`; Full → `brief-format.md`; internal material in play → `internal-sources.md`; one domain pack at most.
 - Subagents (when the platform has them) only at Full depth with three or more independent entities or lanes; each returns a ≤400-word ledger, never raw pages.
 
 ## Never
