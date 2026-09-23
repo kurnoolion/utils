@@ -1,0 +1,26 @@
+{
+  "skill_name": "fathom",
+  "evals": [
+    {
+      "id": 0,
+      "name": "forecast-agi-timeline",
+      "prompt": "forecast: will AGI become reality within the next 1-2 years? I lead an internal AI strategy group and need your best call, how confident you are, and what to watch.",
+      "expected_output": "A forecast brief: the question made resolvable with a named definition and deadline, reference class/base rate, decomposition, tagged and dated signals, likelihood word + numeric range and a separate confidence level, scenarios, dated signposts including one that breaks the thesis, unknowns, linked sources.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "contested-claim-ai-hiring",
+      "prompt": "brief me on: is the narrative that AI coding agents are replacing junior software developers actually supported by hiring data, or is it ahead of the evidence?",
+      "expected_output": "A targeted brief: bottom line first, tagged/dated evidence with independence and lineage checked, an explicit counter-evidence search result, rival explanations, unknowns, what would change the conclusion, sources.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "quick-status-upper-cband",
+      "prompt": "quick: what's the current status of the FCC upper C-band auction (3.98-4.2 GHz) \u2014 auction date and band plan?",
+      "expected_output": "A short answer (under ~150 words) with the date, band plan, one qualification and a dated primary source; no padding, few searches.",
+      "files": []
+    }
+  ]
+}
