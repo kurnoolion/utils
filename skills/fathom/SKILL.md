@@ -19,6 +19,14 @@ Purpose: reduce the uncertainty that matters for a decision, at the smallest cos
 4. **What would change the conclusion**, and for anything forward-looking, **dated signposts** to watch.
 5. **What the record doesn't show**, stated as unknowns rather than smoothed over.
 
+## Profile and domain packs (personalize without editing this file)
+
+Before framing, look for a profile: `./fathom-profile.md` or `./.claude/fathom-profile.md` in the working directory, else `~/.claude/fathom-profile.md`. If one exists, read it once and apply it: it carries the reader, house style, defaults, trusted sources and standing signposts. Personalization belongs there, never in this file or the references, so that skill updates do not erase it. `profile.template.md` shows the slots.
+
+At Targeted and Full depth, load **one** domain pack from `references/domains/` chosen from the question's subject (telecom, ai-ml, investing, security, software-cloud, mobile-devices); the profile's default pack applies when the subject is ambiguous; `domain: <name>` forces one. A pack supplies primary sources, expert vocabulary, a signpost calendar and domain pitfalls; it replaces guessing at search terms. At Quick depth load a pack only when forced.
+
+When instructions conflict: prompt prefixes (`quick:`, `full:`, `domain:`) beat the project profile, which beats the personal profile, which beats the domain pack, which beats the defaults here. The evidence rules (tags, two axes, the Never list) are not overridable.
+
 ## Step 0 — Frame (before any search; five lines, to yourself)
 
 - **Question behind the question** — what decision or belief does this serve? Research the underlying problem, not the wording.
@@ -112,7 +120,7 @@ House style: direct analytic voice, numbered sections, tables with "why it matte
 - Frame first; a wrong frame is the most expensive search.
 - One query per lane, expert vocabulary, budgets by depth.
 - Ledger lines, not notes; no drafts; no tables for uncontested points.
-- Load a reference file only when its trigger fires: forecast → `forecasting.md`; contested or high-stakes → `evidence.md`; Full → `brief-format.md`.
+- Load a reference file only when its trigger fires: forecast → `forecasting.md`; contested or high-stakes → `evidence.md`; Full → `brief-format.md`; one domain pack at most.
 - Subagents (when the platform has them) only at Full depth with three or more independent entities or lanes; each returns a ≤400-word ledger, never raw pages.
 
 ## Never

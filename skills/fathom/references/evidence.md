@@ -29,14 +29,13 @@ When two credible sources disagree, one of these usually explains it, and the ex
 
 Say precisely which applies: *not searched* · *searched, not located* (say where) · *located* · *located, not accessible* · *confirmed does not exist* (by whom). Not finding something is evidence about the search, not about the world.
 
-## Source tiers by domain (primary → secondary → discovery)
+## Source tiers
 
-- **Telecom and spectrum:** 3GPP specs, TDocs and meeting reports; FCC, NTIA and Ofcom dockets and auction results; SEC filings; earnings transcripts; GSMA and CTIA data → carrier and vendor press releases; Light Reading, Fierce, SDxCentral, RCR, Mobile World Live analysis → forums, LinkedIn posts.
-- **Devices and mobile OS:** developer docs, release notes, OS and kernel source commits, FCC ID and certification listings, developer-conference sessions, teardowns (iFixit, TechInsights) → reporters and analysts with a scored track record, trade-press roundups → anonymous leakers, renders, concept videos.
-- **AI/ML:** papers with code and evals, model cards, lab blogs, leaderboards, pricing pages → analyst notes, reputable newsletters → social media.
-- **Trading and investing:** filings (10-K, 10-Q, 8-K, S-1), transcripts, regulator data, primary datasets → sell-side notes, financial press → forums, X.
-- **Cloud, software and dev practices:** official docs, changelogs, RFCs, incident post-mortems, DORA and "State of X" surveys (check methodology) → conference talks, engineering blogs → opinion posts.
-- **Security:** vendor advisories, CVE/NVD, CISA KEV, researcher write-ups with proof of concept → security press → social media.
+Domain-specific source lists, vocabulary and signpost calendars live in `references/domains/<domain>.md`; load the matching pack rather than improvising. The generic ladder, for domains without a pack:
+
+- **Primary (decide):** the record itself — filings, specs, standards contributions, transcripts, release notes, source code, official docs, regulator and court records, measurements with method.
+- **Secondary (frame):** trade press and analysts who cite primaries; useful for framing and for finding primaries. Note who pays them.
+- **Discovery (locate):** forums, social posts, leaks, renders. They can find a question; they cannot settle it.
 
 Within a tier prefer the newest dated item. Across tiers, a lower tier can discover but not decide.
 

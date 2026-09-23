@@ -14,7 +14,10 @@ It borrows the disciplines that earn their keep from heavier protocols (Research
 | `references/forecasting.md` | Base rate → decomposition → signal ranking → scenarios → signposts. | Loaded only for "will X do Y" questions |
 | `references/evidence.md` | Claim appraisal, lineage check, conflict checklist, source tiers by domain. | Loaded only for contested or high-stakes claims |
 | `references/brief-format.md` | Full-brief template and house style. | Loaded only at Full depth |
-| `portable/PROTOCOL.md` | Everything above compressed into one file, under 8,000 characters. | Gemini Gems, ChatGPT custom GPTs, Claude Projects |
+| `references/domains/*.md` | Domain packs: primary sources, expert vocabulary, signpost calendar, pitfalls for telecom, ai-ml, investing, security, software-cloud, mobile-devices. | One pack per run, at Targeted/Full |
+| `profile.template.md` | Slots for your own reader, sources, house style, defaults and standing signposts. Copy it; never edit SKILL.md. | Your copy is read on every run |
+| `portable/PROTOCOL.md` | Everything above compressed into one file, under 8,000 characters. | Gemini Gems, Claude Projects |
+| `portable/PROTOCOL-lite.md` | Same protocol at ~4,600 characters, leaving room for a profile in an 8,000-character box. | ChatGPT custom GPTs with a profile |
 | `portable/KERNEL.md` | 1,500-character version for tight instruction fields. | ChatGPT personal custom instructions, quick paste |
 
 ## How to invoke it
@@ -31,6 +34,18 @@ refresh: update briefs/l4s_android_mno.md — what changed since May 2026?
 
 Every answer comes back as: bottom line → tagged evidence → counter-evidence → what we don't know → what would change this → signals to watch → sources. Forecasts add a probability word with a numeric range and a separate confidence level.
 
+## Make it yours: the profile
+
+Copy `profile.template.md` to `~/.claude/fathom-profile.md` (personal) or `<repo>/fathom-profile.md` (project) and fill the slots: who reads your briefs, your default domain pack and trusted sources, house style, defaults, standing signposts, and things to never do. Keep it under about 40 lines; it is loaded on every run. On Gemini and ChatGPT, paste the filled profile after the protocol in the instructions box.
+
+Precedence when things conflict: prompt prefixes (`quick:`, `full:`, `domain: security`) > project profile > personal profile > domain pack > skill defaults. The evidence rules (tags, two axes, the Never list) cannot be overridden; that is what keeps briefs comparable across the team.
+
+Do not edit `SKILL.md` or the references to personalize. Updates would overwrite your changes, and briefs from different people would stop being comparable.
+
+## Domain packs
+
+`references/domains/` holds one file per domain with the primary sources that decide questions there, the vocabulary experts search with, a signpost calendar, and the domain's characteristic traps. The skill loads at most one per run, chosen from the question, your profile's default, or a `domain:` prefix. To add a domain, copy the closest pack, keep it under about 40 lines, and open a pull request; a pack is the right place for team knowledge that would otherwise live in someone's head.
+
 ## Reading the tags and the confidence language
 
 - `[Stated]` the actor said it publicly (who, when). `[Observed]` a verifiable record or action. `[Inferred]` the assistant's read, with reasoning and confidence.
@@ -43,13 +58,13 @@ Every answer comes back as: bottom line → tagged evidence → counter-evidence
 Copy or symlink this folder into `~/.claude/skills/fathom/` (personal) or `<repo>/.claude/skills/fathom/` (project). Start a new session; it triggers automatically on research-shaped requests, or type `/fathom <question>`.
 
 ### Claude.ai
-Either upload the packaged `fathom.skill` file under Settings → Capabilities → Skills, or create a Project and paste `portable/PROTOCOL.md` into the project instructions. Attach the three `references/*.md` files as project knowledge if you want the full modules available.
+Either upload the packaged `fathom.skill` file under Settings → Capabilities → Skills, or create a Project and paste `portable/PROTOCOL.md` into the project instructions. Attach the `references/*.md` files and the domain packs as project knowledge if you want the full modules available; paste your profile after the protocol.
 
 ### Gemini (Gem)
-Create a Gem. Paste `portable/PROTOCOL.md` into Instructions. Google's guidance recommends shorter instructions, but multi-thousand-character instructions work in practice; if the Gem misbehaves, use `portable/KERNEL.md` as the instruction and attach `PROTOCOL.md` plus the references as knowledge files (Gems accept up to 10). Turn on Google Search grounding.
+Create a Gem. Paste `portable/PROTOCOL.md` followed by your filled profile into Instructions. Google's guidance recommends shorter instructions, but multi-thousand-character instructions work in practice; if the Gem misbehaves, use `portable/KERNEL.md` as the instruction and attach `PROTOCOL.md` plus the references as knowledge files (Gems accept up to 10). Turn on Google Search grounding.
 
 ### ChatGPT
-Custom GPT: paste `portable/PROTOCOL.md` into Instructions (limit 8,000 characters; PROTOCOL is ~7,000), enable Web Browsing, attach the `references/*.md` files as Knowledge. Personal custom instructions: paste `portable/KERNEL.md` (fits the 1,500-character field). Projects: PROTOCOL.md as project instructions.
+Custom GPT: paste `portable/PROTOCOL-lite.md` plus your filled profile into Instructions (limit 8,000 characters; lite is ~4,600), enable Web Browsing, attach the `references/*.md` and `references/domains/*.md` files as Knowledge. Without a profile, the full `PROTOCOL.md` fits on its own. Personal custom instructions: paste `portable/KERNEL.md` (fits the 1,500-character field). Projects: PROTOCOL.md as project instructions.
 
 ## Why it is lean
 
@@ -57,7 +72,8 @@ Custom GPT: paste `portable/PROTOCOL.md` into Instructions (limit 8,000 characte
 - Depth tiers with explicit search budgets (Quick ≤3, Targeted 4–10, Full per lane × entity).
 - One query per evidence lane in expert vocabulary rather than fan-out by volume.
 - A one-line-per-finding ledger instead of notes; the brief is written once from the ledger.
-- Reference modules load only when their trigger fires; hypothesis tables only when two explanations genuinely compete.
+- Reference modules and domain packs load only when their trigger fires; hypothesis tables only when two explanations genuinely compete.
+- Profiles are capped at about 40 lines so personalization never quietly becomes a second protocol.
 - Subagents only at Full depth with three or more independent entities, and they return ledgers, not pages.
 
 ## Versioning
