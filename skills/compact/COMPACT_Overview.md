@@ -413,6 +413,11 @@ PR review isn't just about code anymore. It's about code + the memory artifacts 
   regen-map/SKILL.md
   drift-check/SKILL.md
   doctor/SKILL.md
+  start-strand/SKILL.md
+  switch-strand/SKILL.md
+  list-strands/SKILL.md
+  land-strand/SKILL.md
+  adopt-strands/SKILL.md
   project-init/
     SKILL.md
     base-prompts/
@@ -422,6 +427,10 @@ docs/compact/                   ← created by project-init
   PROJECT.md  requirements.md  STATUS.md  DECISIONS.md  MAP.md
   structure-conventions.md  project-init-interview.md
   phases/{requirements,architecture,development}.md
+  strands/<name>/{STRAND.md,journal.md,decisions-draft.md}
+  strands/_archive/<name>/  ← landed or abandoned strands
+
+.compact/current-strand    ← per-clone session binding (gitignored)
 
 src/<module>/MODULE.md     ← co-located with code
 CLAUDE.md                  ← one-liner to auto-trigger session-start
@@ -441,6 +450,11 @@ CLAUDE.md                  ← one-liner to auto-trigger session-start
 | `regen-map` | Refresh MODULE.md Structure and MAP.md from code | Invoked by close-session (or manually) |
 | `drift-check` | Detect + resolve drift across R/D/I layers (requirements vs design vs implementation). Interactive; never auto-fixes | When close-session nudges, or on demand |
 | `doctor` | Audit the scaffold itself for drift (stale refs, schema quorum, skill inventory, tool-neutral framing, step-reference resolution) | Auto-invoked by close-session every session (or manually) |
+| `start-strand` | Scaffold a strand folder (`STRAND.md`, `journal.md`, `decisions-draft.md`) under `docs/compact/strands/<name>/` | Starting a parallel work item |
+| `switch-strand` | Bind the session to a strand (`.compact/current-strand`); `none` unbinds | Start of a session on that work |
+| `list-strands` | Table of active strands; `--include-archived` adds landed ones. Read-only | Any time |
+| `land-strand` | Promote draft decisions to `DECISIONS.md`, mark the strand landed, archive it | When the strand's work has shipped |
+| `adopt-strands` | One-time retrofit of strands into an existing COMPACT project | Once per project |
 
 ---
 
